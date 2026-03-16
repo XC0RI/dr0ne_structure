@@ -1,7 +1,7 @@
 // functions/api/upload.js
 // POST /api/upload  (multipart/form-data)
-// Fields: image (File, already WebP from client), date, made_by, made_by2,
-//         type, first_pub, title, location, txt
+// Fields: image (File — any format, converted to WebP client-side before sending),
+//         date, made_by, made_by2, type, first_pub, title, location, txt
 // Protected by _middleware.js
 
 export async function onRequestPost(context) {
@@ -16,10 +16,10 @@ export async function onRequestPost(context) {
     return json({ error: 'No image provided' }, 400);
   }
 
-  // Validate: must be WebP (client converts before sending)
   const imageBuffer = await imageFile.arrayBuffer();
-  if (!isWebP(imageBuffer)) {
-    return json({ error: 'Image must be WebP format' }, 400);
+
+  if (imageBuffer.byteLength === 0) {
+    return json({ error: 'Image is empty' }, 400);
   }
 
   // Generate unique ID and R2 key
@@ -65,17 +65,6 @@ export async function onRequestPost(context) {
     try { await env.BUCKET.delete(r2Key); } catch {}
     return json({ error: 'Upload failed' }, 500);
   }
-}
-
-// Check WebP magic bytes: 52 49 46 46 ?? ?? ?? ?? 57 45 42 50
-function isWebP(buffer) {
-  const bytes = new Uint8Array(buffer);
-  return (
-    bytes[0] === 0x52 && bytes[1] === 0x49 &&
-    bytes[2] === 0x46 && bytes[3] === 0x46 &&
-    bytes[8] === 0x57 && bytes[9] === 0x45 &&
-    bytes[10] === 0x42 && bytes[11] === 0x50
-  );
 }
 
 function json(data, status = 200) {
