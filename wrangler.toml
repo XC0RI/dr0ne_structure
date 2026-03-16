@@ -5,7 +5,7 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "dr0ne_db"
-database_id = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id = "380fa1f8-4122-4f11-b324-89d3675e9552"
 
 [[r2_buckets]]
 binding = "BUCKET"
