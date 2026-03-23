@@ -24,7 +24,7 @@ export async function onRequestPost(context) {
 
   // Generate unique ID and R2 key
   const id    = crypto.randomUUID();
-  const r2Key = `images/${id}.webp`;
+  const r2Key = `images/dr0ne-${id}.webp`;
   const now   = new Date().toISOString();
 
   // Read metadata fields (all optional, default to '-')
