@@ -1,16 +1,8 @@
 /* style.css */
 
 @font-face {
-  font-family: 'Geist';
-  src: url('/fonts/Geist-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: block;
-}
-
-@font-face {
-  font-family: 'GeistMono';
-  src: url('/fonts/GeistMono-Medium.woff2') format('woff2');
+  font-family: 'GeistDr0ne';
+  src: url('/fonts/GeistDr0ne-Medium.woff2') format('woff2');
   font-weight: 500;
   font-style: normal;
   font-display: block;
@@ -24,8 +16,8 @@
   --white:       #ffffff;
   --black:       #000000;
 
-  --font-main: 'Geist', sans-serif;
-  --font-mono: 'GeistMono', monospace;
+  --font-main: 'GeistDr0ne', sans-serif;
+  --font-mono: 'GeistDr0ne', monospace;
 
   --pad: clamp(16px, 3vw, 32px);
 }
@@ -136,10 +128,7 @@ html, body {
   letter-spacing: -0.01em;
   line-height: 1;
 }
-#drone-label .mono {
-  font-family: var(--font-mono);
-  font-weight: 500;
-}
+
 
 /* ─── Archive Overlay ────────────────────────────────────── */
 #archive-overlay {
