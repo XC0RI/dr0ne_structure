@@ -168,11 +168,23 @@ html, body {
 #archive-table col.col-txt      { width: auto; }
 #archive-table col.col-admin    { width: 0; }
 
-/* Allow wrapping in all columns */
+/* Default: no wrap, clip overflow */
 #archive-table td,
 #archive-table th {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Wrap allowed in made_by2, title, txt — but never break mid-word */
+#archive-table td.made_by2,
+#archive-table td.title,
+#archive-table td.txt {
   white-space: normal;
-  word-break: break-word;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 #archive-table thead tr {
