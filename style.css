@@ -23,7 +23,6 @@
 
   --white:       #ffffff;
   --black:       #000000;
-  --overlay-bg:  rgba(0, 0, 0, 0.10);   /* 10% darkening for archive overlay */
 
   --font-main: 'Geist', sans-serif;
   --font-mono: 'GeistMono', monospace;
@@ -41,7 +40,7 @@
 html, body {
   width: 100%;
   height: 100%;
-  overflow: hidden;             /* Scroll handled in JS per collage */
+  overflow: hidden;
   background: var(--black);
   font-family: var(--font-main);
   font-weight: 500;
@@ -56,28 +55,26 @@ html, body {
   z-index: 0;
 }
 
-/* Each collage occupies the full viewport */
 .collage {
   position: absolute;
   inset: 0;
   display: grid;
-  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
-  will-change: transform, opacity;
+  transition: opacity 0.5s ease,
+              transform 0.5s cubic-bezier(0.76, 0, 0.24, 1),
+              filter 0.5s ease;
+  will-change: transform, opacity, filter;
 }
 
-/* Landscape: two vertical halves */
 @media (orientation: landscape) {
   .collage { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
 }
-
-/* Portrait: two horizontal halves */
 @media (orientation: portrait) {
   .collage { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
 }
 
-/* Blur & dim collage when archive is open */
+/* Blur & dim collage when archive is open — animated via transition above */
 .collage-blurred {
-  filter: blur(6px) brightness(0.9);
+  filter: blur(12px) brightness(0.9);
   pointer-events: none;
   user-select: none;
 }
@@ -94,7 +91,6 @@ html, body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* zoom and position set via inline style from JS */
 }
 
 /* ─── Info text per frame ────────────────────────────────── */
@@ -105,13 +101,10 @@ html, body {
   pointer-events: none;
 }
 
-/* Landscape: frame 1 → bottom-left; frame 2 → bottom-right */
 @media (orientation: landscape) {
-  .frame:first-child  .frame-info { bottom: var(--pad); left: var(--pad);  text-align: left; }
-  .frame:last-child   .frame-info { bottom: var(--pad); right: var(--pad); text-align: right; }
+  .frame:first-child .frame-info { bottom: var(--pad); left: var(--pad);  text-align: left; }
+  .frame:last-child  .frame-info { bottom: var(--pad); right: var(--pad); text-align: right; }
 }
-
-/* Portrait: both frames → left-aligned, vertically centred */
 @media (orientation: portrait) {
   .frame-info { left: var(--pad); top: 50%; transform: translateY(-50%); text-align: left; }
 }
@@ -125,10 +118,9 @@ html, body {
   margin: 0;
   line-height: 1.5;
 }
-
 .frame-info p:not(:last-child) { margin-bottom: 0.25em; }
 
-/* ─── DR0NE — centre label ───────────────────────────────── */
+/* ─── DR0NE centre label ─────────────────────────────────── */
 #drone-label {
   position: fixed;
   top: 50%;
@@ -144,7 +136,6 @@ html, body {
   letter-spacing: -0.01em;
   line-height: 1;
 }
-
 #drone-label .mono {
   font-family: var(--font-mono);
   font-weight: 500;
@@ -156,12 +147,13 @@ html, body {
   inset: 0;
   z-index: 50;
   overflow-y: auto;
+  overscroll-behavior: contain;   /* prevents scroll bleed to collage */
   display: none;
+  opacity: 0;
   padding: var(--pad);
-  padding-top: calc(var(--pad) + var(--fs) + 24px);  /* below DR0NE */
+  padding-top: calc(var(--pad) + var(--fs) + 24px);
+  transition: opacity 0.5s ease;
 }
-
-#archive-overlay.open { display: block; }
 
 /* Archive table */
 #archive-table {
@@ -171,16 +163,26 @@ html, body {
   color: var(--white);
 }
 
+/* Header row: slightly stronger border, same width as table */
+#archive-table thead tr {
+  border-bottom: 1px solid rgba(255,255,255,0.35);
+}
+
 #archive-table th {
   font-family: var(--font-main);
   font-weight: 500;
   text-align: left;
   padding: 6px 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
+  border-bottom: none;
   white-space: nowrap;
   letter-spacing: 0.03em;
-  cursor: default;
 }
+
+#archive-table th[style*="cursor"] {
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+#archive-table th[style*="cursor"]:hover { opacity: 1; }
 
 #archive-table td {
   padding: 6px 10px;
@@ -189,11 +191,12 @@ html, body {
   cursor: pointer;
   transition: opacity 0.15s;
 }
-
 #archive-table td:hover { opacity: 0.65; }
 
-#archive-table td.thumb { width: 48px; cursor: pointer; }
-
+#archive-table td.thumb {
+  width: 48px;
+  cursor: pointer;
+}
 #archive-table td.thumb img {
   width: 40px;
   height: 40px;
@@ -201,9 +204,7 @@ html, body {
   display: block;
 }
 
-#archive-table tr.filtered-out { display: none; }
-
-/* Active filter badge */
+/* ─── Filter bar ─────────────────────────────────────────── */
 #filter-bar {
   display: flex;
   align-items: center;
@@ -221,10 +222,9 @@ html, body {
   cursor: pointer;
   white-space: nowrap;
 }
-
 .filter-badge:hover { opacity: 0.7; }
 
-/* Admin controls */
+/* ─── Admin controls ─────────────────────────────────────── */
 .admin-controls { margin-bottom: 16px; }
 
 .btn {
@@ -239,7 +239,6 @@ html, body {
   cursor: pointer;
   transition: opacity 0.15s;
 }
-
 .btn:hover { opacity: 0.65; }
 .btn + .btn { margin-left: 8px; }
 
@@ -253,7 +252,6 @@ html, body {
   align-items: center;
   justify-content: center;
 }
-
 #modal-overlay.open { display: flex; }
 
 .modal {
@@ -262,20 +260,17 @@ html, body {
   border: 1px solid rgba(255,255,255,0.2);
   background: rgba(0,0,0,0.6);
 }
-
 .modal h2 {
   font-size: var(--fs);
   font-weight: 500;
   margin-bottom: 24px;
 }
-
 .modal label {
   display: block;
   font-size: var(--fs-info);
   margin-bottom: 4px;
   opacity: 0.6;
 }
-
 .modal input,
 .modal select,
 .modal textarea {
@@ -292,13 +287,9 @@ html, body {
   margin-bottom: 20px;
   transition: border-color 0.2s;
 }
-
 .modal input:focus,
 .modal select:focus,
-.modal textarea:focus {
-  border-color: rgba(255,255,255,0.8);
-}
-
+.modal textarea:focus { border-color: rgba(255,255,255,0.8); }
 .modal select option { background: #111; }
 .modal textarea { resize: vertical; min-height: 60px; }
 
@@ -315,9 +306,7 @@ html, body {
   margin-bottom: 20px;
   display: none;
 }
-
 #upload-preview-wrap.has-image { display: block; }
-
 #upload-preview {
   width: 100%;
   max-height: 200px;

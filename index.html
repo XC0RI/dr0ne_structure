@@ -50,25 +50,12 @@
 
   <script type="module">
     import { initCollage, blurCollage, unblurCollage } from '/src/collage.js';
-    import { openArchive, closeArchive }               from '/src/archive.js';
+    import { openArchive, closeArchive, renderTableHeader } from '/src/archive.js';
     import { openUploadModal, openEditModal }           from '/src/upload-ui.js';
     import { isLoggedIn, login }                       from '/src/auth.js';
 
     // ── Build archive table header ─────────────────────────────────────
-    const COLS = [
-      '0','position','date','made by','made by2',
-      'type','1st','title','location','txt'
-    ];
-    const thead = document.getElementById('archive-thead');
-    const headerRow = document.createElement('tr');
-    COLS.forEach(label => {
-      const th = document.createElement('th');
-      th.textContent = label;
-      headerRow.appendChild(th);
-    });
-    // Extra th for admin buttons (hidden when not logged in)
-    headerRow.appendChild(document.createElement('th'));
-    thead.appendChild(headerRow);
+    renderTableHeader();
 
     // ── Fetch images from D1 ───────────────────────────────────────────
     let images = [];
