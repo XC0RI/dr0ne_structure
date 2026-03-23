@@ -243,11 +243,20 @@ function closeModal() {
   modalOverlay.innerHTML = '';
 }
 
-// Convert any image File to WebP ≤ 1MB
-// Safari ignores quality param on toBlob → we scale dimensions until under 1MB
+// Convert image to WebP (Chrome/Firefox) or JPEG (Safari) ≤ 1MB, max 2500px
 async function convertToWebP(file) {
   const MAX_PX = 2500;
   const MAX_MB = 1 * 1024 * 1024;
+
+  // Detect if browser respects WebP quality param (Safari does not)
+  async function supportsWebPQuality() {
+    const c = document.createElement('canvas');
+    c.width = c.height = 4;
+    c.getContext('2d').fillRect(0, 0, 4, 4);
+    const hi = await new Promise(r => c.toBlob(r, 'image/webp', 0.99));
+    const lo = await new Promise(r => c.toBlob(r, 'image/webp', 0.01));
+    return hi.size !== lo.size;
+  }
 
   const img = new Image();
   const objectUrl = URL.createObjectURL(file);
@@ -261,7 +270,7 @@ async function convertToWebP(file) {
   let width  = img.naturalWidth;
   let height = img.naturalHeight;
 
-  // Step 1: scale down to max 2500px on longest side
+  // Scale down to max 2500px on longest side
   if (width > MAX_PX || height > MAX_PX) {
     if (width >= height) {
       height = Math.round(height * MAX_PX / width);
@@ -272,33 +281,34 @@ async function convertToWebP(file) {
     }
   }
 
-  // Helper: draw at given dimensions and export WebP
-  async function tryExport(w, h, quality) {
+  async function tryExport(w, h, format, quality) {
     const canvas = document.createElement('canvas');
     canvas.width  = w;
     canvas.height = h;
     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-    return new Promise(res => canvas.toBlob(res, 'image/webp', quality));
+    return new Promise(res => canvas.toBlob(res, format, quality));
   }
 
-  // Step 2: try quality steps first (works in Chrome/Firefox)
-  for (const q of [0.75, 0.60, 0.45, 0.30]) {
-    const blob = await tryExport(width, height, q);
+  const webpWorks = await supportsWebPQuality();
+  const format = webpWorks ? 'image/webp' : 'image/jpeg';
+
+  // Try quality steps: 0.82 → 0.70 → 0.58 → 0.46
+  for (const q of [0.82, 0.70, 0.58, 0.46]) {
+    const blob = await tryExport(width, height, format, q);
     if (blob.size <= MAX_MB) return blob;
   }
 
-  // Step 3: Safari fallback — reduce dimensions by 20% per step until under 1MB
+  // Still too large → reduce dimensions by 15% per step
   let w = width;
   let h = height;
-  while (w > 200 && h > 200) {
-    w = Math.floor(w * 0.80);
-    h = Math.floor(h * 0.80);
-    const blob = await tryExport(w, h, 0.75);
+  while (w > 300 && h > 300) {
+    w = Math.floor(w * 0.85);
+    h = Math.floor(h * 0.85);
+    const blob = await tryExport(w, h, format, 0.75);
     if (blob.size <= MAX_MB) return blob;
   }
 
-  // Absolute fallback
-  return tryExport(w, h, 0.50);
+  return tryExport(w, h, format, 0.60);
 }
 
 function escAttr(str) {
