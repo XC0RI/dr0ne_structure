@@ -154,20 +154,18 @@ html, body {
   color: var(--white);
 }
 
+#archive-table thead tr {
+  border-bottom: 1px solid rgba(255,255,255,0.35);
+}
+
 #archive-table th {
   font-family: var(--font-main);
   font-weight: 500;
   text-align: left;
   padding: 6px 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.35);
+  border-bottom: none;
   white-space: nowrap;
   letter-spacing: 0.03em;
-}
-
-/* No border on the empty admin column */
-#archive-table th:last-child,
-#archive-table td:last-child {
-  border-bottom: none;
 }
 
 #archive-table th[style*="cursor"] {
@@ -176,19 +174,18 @@ html, body {
 }
 #archive-table th[style*="cursor"]:hover { opacity: 1; }
 
+#archive-table tbody tr {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
 #archive-table td {
   padding: 6px 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: none;
   vertical-align: top;
   cursor: pointer;
   transition: opacity 0.15s;
 }
 
-/* Last real content column: add right padding to match overlay padding */
-#archive-table th:nth-last-child(2),
-#archive-table td:nth-last-child(2) {
-  padding-right: var(--pad);
-}
 #archive-table td:hover { opacity: 0.65; }
 
 #archive-table td.thumb {
