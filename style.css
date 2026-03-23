@@ -309,5 +309,5 @@ html, body {
   display: block;
 }
 
-/* ─── Utilities ──────────────────────────────────────────── */
+/* ─── Utilities ─────────────────────────────────────────── */
 .hidden { display: none !important; }

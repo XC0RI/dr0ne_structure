@@ -321,7 +321,7 @@ function hidePreview() {
   }
 }
 
-// ─── Delete ────────────────────────────────────────────────────────────────────
+// ─── Delete ───────────────────────────────────────────────────────────────────
 
 async function deleteImage(id) {
   if (!confirm('Delete this image permanently?')) return;
