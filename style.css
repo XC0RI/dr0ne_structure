@@ -168,19 +168,11 @@ html, body {
 #archive-table col.col-txt      { width: auto; }
 #archive-table col.col-admin    { width: 0; }
 
-/* Truncate overflowing text cleanly */
+/* Allow wrapping in all columns */
 #archive-table td,
 #archive-table th {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* txt column: allow wrapping */
-#archive-table td.txt,
-#archive-table th.txt-h {
   white-space: normal;
-  overflow: visible;
+  word-break: break-word;
 }
 
 #archive-table thead tr {
