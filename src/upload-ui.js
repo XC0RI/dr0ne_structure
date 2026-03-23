@@ -243,10 +243,11 @@ function closeModal() {
   modalOverlay.innerHTML = '';
 }
 
-// Convert any image File to WebP, max 2500px on longest side, quality 0.75 → fallback to 0.60 → 0.45
+// Convert any image File to WebP ≤ 1MB
+// Safari ignores quality param on toBlob → we scale dimensions until under 1MB
 async function convertToWebP(file) {
-  const MAX_PX  = 2500;
-  const MAX_MB  = 1 * 1024 * 1024;
+  const MAX_PX = 2500;
+  const MAX_MB = 1 * 1024 * 1024;
 
   const img = new Image();
   const objectUrl = URL.createObjectURL(file);
@@ -260,7 +261,7 @@ async function convertToWebP(file) {
   let width  = img.naturalWidth;
   let height = img.naturalHeight;
 
-  // Scale down proportionally if longest side exceeds MAX_PX
+  // Step 1: scale down to max 2500px on longest side
   if (width > MAX_PX || height > MAX_PX) {
     if (width >= height) {
       height = Math.round(height * MAX_PX / width);
@@ -271,19 +272,33 @@ async function convertToWebP(file) {
     }
   }
 
-  const canvas = document.createElement('canvas');
-  canvas.width  = width;
-  canvas.height = height;
-  canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+  // Helper: draw at given dimensions and export WebP
+  async function tryExport(w, h, quality) {
+    const canvas = document.createElement('canvas');
+    canvas.width  = w;
+    canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    return new Promise(res => canvas.toBlob(res, 'image/webp', quality));
+  }
 
-  // Try quality steps until under 1MB
+  // Step 2: try quality steps first (works in Chrome/Firefox)
   for (const q of [0.75, 0.60, 0.45, 0.30]) {
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', q));
+    const blob = await tryExport(width, height, q);
     if (blob.size <= MAX_MB) return blob;
   }
 
-  // Last resort: return lowest quality
-  return new Promise(res => canvas.toBlob(res, 'image/webp', 0.20));
+  // Step 3: Safari fallback — reduce dimensions by 20% per step until under 1MB
+  let w = width;
+  let h = height;
+  while (w > 200 && h > 200) {
+    w = Math.floor(w * 0.80);
+    h = Math.floor(h * 0.80);
+    const blob = await tryExport(w, h, 0.75);
+    if (blob.size <= MAX_MB) return blob;
+  }
+
+  // Absolute fallback
+  return tryExport(w, h, 0.50);
 }
 
 function escAttr(str) {
