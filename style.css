@@ -154,17 +154,12 @@ html, body {
   color: var(--white);
 }
 
-/* Header row: slightly stronger border, same width as table */
-#archive-table thead tr {
-  border-bottom: 1px solid rgba(255,255,255,0.35);
-}
-
 #archive-table th {
   font-family: var(--font-main);
   font-weight: 500;
   text-align: left;
   padding: 6px 10px;
-  border-bottom: none;
+  border-bottom: 1px solid rgba(255,255,255,0.35);
   white-space: nowrap;
   letter-spacing: 0.03em;
 }
