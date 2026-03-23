@@ -164,6 +164,12 @@ html, body {
   letter-spacing: 0.03em;
 }
 
+/* No border on the empty admin column */
+#archive-table th:last-child,
+#archive-table td:last-child {
+  border-bottom: none;
+}
+
 #archive-table th[style*="cursor"] {
   opacity: 0.85;
   transition: opacity 0.15s;
@@ -176,6 +182,12 @@ html, body {
   vertical-align: top;
   cursor: pointer;
   transition: opacity 0.15s;
+}
+
+/* Last real content column: add right padding to match overlay padding */
+#archive-table th:nth-last-child(2),
+#archive-table td:nth-last-child(2) {
+  padding-right: var(--pad);
 }
 #archive-table td:hover { opacity: 0.65; }
 
