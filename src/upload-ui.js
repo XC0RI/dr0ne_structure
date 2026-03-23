@@ -243,20 +243,27 @@ function closeModal() {
   modalOverlay.innerHTML = '';
 }
 
-// Convert image to WebP (Chrome/Firefox) or JPEG (Safari) ≤ 1MB, max 2500px
+// Convert image ≤ 1MB, max 2500px
+// - If already WebP and ≤ 1MB and ≤ 2500px: upload as-is
+// - Chrome/Firefox: convert to WebP
+// - Safari: convert to JPEG (Safari canvas cannot compress WebP)
 async function convertToWebP(file) {
   const MAX_PX = 2500;
   const MAX_MB = 1 * 1024 * 1024;
 
-  // Detect if browser respects WebP quality param (Safari does not)
-  async function supportsWebPQuality() {
-    const c = document.createElement('canvas');
-    c.width = c.height = 4;
-    c.getContext('2d').fillRect(0, 0, 4, 4);
-    const hi = await new Promise(r => c.toBlob(r, 'image/webp', 0.99));
-    const lo = await new Promise(r => c.toBlob(r, 'image/webp', 0.01));
-    return hi.size !== lo.size;
+  const ua = navigator.userAgent;
+  const isSafari = ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Chromium');
+
+  // If already WebP, small enough, and within pixel limit → return as-is
+  if (file.type === 'image/webp' && file.size <= MAX_MB) {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = objectUrl; });
+    URL.revokeObjectURL(objectUrl);
+    if (img.naturalWidth <= MAX_PX && img.naturalHeight <= MAX_PX) return file;
   }
+
+  const format = isSafari ? 'image/jpeg' : 'image/webp';
 
   const img = new Image();
   const objectUrl = URL.createObjectURL(file);
@@ -281,7 +288,7 @@ async function convertToWebP(file) {
     }
   }
 
-  async function tryExport(w, h, format, quality) {
+  async function tryExport(w, h, quality) {
     const canvas = document.createElement('canvas');
     canvas.width  = w;
     canvas.height = h;
@@ -289,12 +296,9 @@ async function convertToWebP(file) {
     return new Promise(res => canvas.toBlob(res, format, quality));
   }
 
-  const webpWorks = await supportsWebPQuality();
-  const format = webpWorks ? 'image/webp' : 'image/jpeg';
-
-  // Try quality steps: 0.82 → 0.70 → 0.58 → 0.46
+  // Try quality steps until under 1MB
   for (const q of [0.82, 0.70, 0.58, 0.46]) {
-    const blob = await tryExport(width, height, format, q);
+    const blob = await tryExport(width, height, q);
     if (blob.size <= MAX_MB) return blob;
   }
 
@@ -304,11 +308,11 @@ async function convertToWebP(file) {
   while (w > 300 && h > 300) {
     w = Math.floor(w * 0.85);
     h = Math.floor(h * 0.85);
-    const blob = await tryExport(w, h, format, 0.75);
+    const blob = await tryExport(w, h, 0.75);
     if (blob.size <= MAX_MB) return blob;
   }
 
-  return tryExport(w, h, format, 0.60);
+  return tryExport(w, h, 0.60);
 }
 
 function escAttr(str) {
