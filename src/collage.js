@@ -6,6 +6,9 @@ const PRELOAD_COUNT = 4;   // how many collages to keep ready ahead
 let allImages    = [];      // full image list from D1
 let collageIndex = 0;       // how many collages have been shown
 let busy         = false;   // prevents scroll spamming
+let archiveOpen  = false;   // blocks collage scroll when archive is visible
+
+export function setArchiveOpen(val) { archiveOpen = val; }
 
 const stack = document.getElementById('collage-stack');
 
@@ -137,7 +140,7 @@ function preloadCollage(idx) {
 }
 
 function advanceCollage() {
-  if (busy || allImages.length === 0) return;
+  if (busy || allImages.length === 0 || archiveOpen) return;
   busy = true;
 
   const current = stack.querySelector(`[data-col-idx="${collageIndex}"]`);
@@ -188,8 +191,9 @@ function attachScrollListeners() {
     if (delta > 40) advanceCollage();
   }, { passive: true });
 
-  // Keyboard arrow down / space
+  // Keyboard arrow down / space (blocked when archive is open)
   window.addEventListener('keydown', (e) => {
+    if (archiveOpen) return;
     if (e.key === 'ArrowDown' || e.key === ' ') {
       e.preventDefault();
       advanceCollage();

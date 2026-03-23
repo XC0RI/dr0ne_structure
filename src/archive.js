@@ -26,7 +26,7 @@ export function openArchive(images) {
   document.body.style.overflow = 'hidden';
 
   // Animate in: display first, then opacity
-  overlay.style.display  = 'block';
+  overlay.classList.add('open');
   overlay.style.opacity  = '0';
   overlay.style.pointerEvents = 'none';
   requestAnimationFrame(() => {
@@ -41,7 +41,7 @@ export function closeArchive() {
   overlay.style.opacity = '0';
   overlay.style.pointerEvents = 'none';
   setTimeout(() => {
-    overlay.style.display = 'none';
+    overlay.classList.remove('open');
   }, 500);
   document.body.style.overflow = '';
 }

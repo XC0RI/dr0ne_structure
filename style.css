@@ -129,7 +129,7 @@ html, body {
   z-index: 100;
   font-size: var(--fs);
   color: var(--white);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6), 0 2px 16px rgba(0,0,0,0.5);
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
@@ -154,6 +154,8 @@ html, body {
   padding-top: calc(var(--pad) + var(--fs) + 24px);
   transition: opacity 0.5s ease;
 }
+
+#archive-overlay.open { display: block; }
 
 /* Archive table */
 #archive-table {
