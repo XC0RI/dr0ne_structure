@@ -150,8 +150,37 @@ html, body {
 #archive-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;          /* columns never resize based on content */
   font-size: var(--fs-info);
   color: var(--white);
+}
+
+/* Fixed column widths — proportional, responsive via % */
+#archive-table col.col-thumb    { width: 52px; }
+#archive-table col.col-position { width: 5%; }
+#archive-table col.col-date     { width: 6%; }
+#archive-table col.col-made-by  { width: 8%; }
+#archive-table col.col-made-by2 { width: 10%; }
+#archive-table col.col-type     { width: 8%; }
+#archive-table col.col-first    { width: 4%; }
+#archive-table col.col-title    { width: 22%; }
+#archive-table col.col-location { width: 9%; }
+#archive-table col.col-txt      { width: auto; }
+#archive-table col.col-admin    { width: 0; }
+
+/* Truncate overflowing text cleanly */
+#archive-table td,
+#archive-table th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* txt column: allow wrapping */
+#archive-table td.txt,
+#archive-table th.txt-h {
+  white-space: normal;
+  overflow: visible;
 }
 
 #archive-table thead tr {

@@ -91,6 +91,24 @@ export function renderTableHeader() {
   const thead = document.getElementById('archive-thead');
   if (!thead) return;
   thead.innerHTML = '';
+
+  // Insert colgroup for fixed widths (must be sibling of thead in table)
+  const table = document.getElementById('archive-table');
+  const existing = table.querySelector('colgroup');
+  if (existing) existing.remove();
+
+  const colDefs = [
+    'col-thumb', 'col-position', 'col-date', 'col-made-by', 'col-made-by2',
+    'col-type', 'col-first', 'col-title', 'col-location', 'col-txt', 'col-admin'
+  ];
+  const colgroup = document.createElement('colgroup');
+  colDefs.forEach(cls => {
+    const col = document.createElement('col');
+    col.className = cls;
+    colgroup.appendChild(col);
+  });
+  table.insertBefore(colgroup, thead);
+
   const tr = document.createElement('tr');
 
   COLUMNS.forEach(col => {
