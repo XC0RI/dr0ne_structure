@@ -243,10 +243,10 @@ function closeModal() {
   modalOverlay.innerHTML = '';
 }
 
-// Convert any image File to WebP, max 2500px on longest side, quality 0.85
+// Convert any image File to WebP, max 2500px on longest side, quality 0.75 → fallback to 0.60 → 0.45
 async function convertToWebP(file) {
   const MAX_PX  = 2500;
-  const QUALITY = 0.85;
+  const MAX_MB  = 1 * 1024 * 1024;
 
   const img = new Image();
   const objectUrl = URL.createObjectURL(file);
@@ -276,7 +276,14 @@ async function convertToWebP(file) {
   canvas.height = height;
   canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
-  return new Promise(res => canvas.toBlob(res, 'image/webp', QUALITY));
+  // Try quality steps until under 1MB
+  for (const q of [0.75, 0.60, 0.45, 0.30]) {
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', q));
+    if (blob.size <= MAX_MB) return blob;
+  }
+
+  // Last resort: return lowest quality
+  return new Promise(res => canvas.toBlob(res, 'image/webp', 0.20));
 }
 
 function escAttr(str) {
