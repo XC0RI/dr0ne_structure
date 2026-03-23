@@ -116,9 +116,7 @@ export function renderTableHeader() {
   });
 
   // Extra th for admin column
-  const adminTh = document.createElement('th');
-  adminTh.className = 'admin-col';
-  tr.appendChild(adminTh);
+  tr.appendChild(document.createElement('th'));
   thead.appendChild(tr);
 }
 
@@ -176,7 +174,7 @@ function renderTable() {
     // Admin buttons
     if (isLoggedIn()) {
       const adminTd = document.createElement('td');
-      adminTd.className = 'admin-col';
+      adminTd.style.whiteSpace = 'nowrap';
 
       const editBtn = document.createElement('button');
       editBtn.className = 'btn';
