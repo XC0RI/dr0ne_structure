@@ -136,7 +136,7 @@ html, body {
   inset: 0;
   z-index: 50;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: contain;   /* prevents scroll bleed to collage */
   display: none;
   opacity: 0;
   padding: var(--pad);
@@ -168,11 +168,23 @@ html, body {
   letter-spacing: 0.03em;
 }
 
+
 #archive-table th[style*="cursor"] {
   opacity: 0.85;
   transition: opacity 0.15s;
 }
 #archive-table th[style*="cursor"]:hover { opacity: 1; }
+
+/* Admin column: no width when empty */
+#archive-table th.admin-col,
+#archive-table td.admin-col {
+  width: 0;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  white-space: nowrap;
+}
+
 
 #archive-table tbody tr {
   border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -309,5 +321,5 @@ html, body {
   display: block;
 }
 
-/* ─── Utilities ─────────────────────────────────────────── */
+/* ─── Utilities ──────────────────────────────────────────── */
 .hidden { display: none !important; }
