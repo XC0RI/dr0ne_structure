@@ -243,11 +243,13 @@ function closeModal() {
   modalOverlay.innerHTML = '';
 }
 
-// Convert any image File to WebP ≤ 1 MB using Canvas
-async function convertToWebP(file, maxMB = 1) {
+// Convert any image File to WebP, max 2500px on longest side, quality 0.85
+async function convertToWebP(file) {
+  const MAX_PX  = 2500;
+  const QUALITY = 0.85;
+
   const img = new Image();
   const objectUrl = URL.createObjectURL(file);
-
   await new Promise((res, rej) => {
     img.onload = res;
     img.onerror = rej;
@@ -255,21 +257,26 @@ async function convertToWebP(file, maxMB = 1) {
   });
   URL.revokeObjectURL(objectUrl);
 
+  let width  = img.naturalWidth;
+  let height = img.naturalHeight;
+
+  // Scale down proportionally if longest side exceeds MAX_PX
+  if (width > MAX_PX || height > MAX_PX) {
+    if (width >= height) {
+      height = Math.round(height * MAX_PX / width);
+      width  = MAX_PX;
+    } else {
+      width  = Math.round(width  * MAX_PX / height);
+      height = MAX_PX;
+    }
+  }
+
   const canvas = document.createElement('canvas');
-  canvas.width  = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-  canvas.getContext('2d').drawImage(img, 0, 0);
+  canvas.width  = width;
+  canvas.height = height;
+  canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
-  const MAX = maxMB * 1024 * 1024;
-  let quality = 0.92;
-  let blob;
-
-  do {
-    blob = await new Promise(res => canvas.toBlob(res, 'image/webp', quality));
-    quality = Math.max(0.1, quality - 0.06);
-  } while (blob.size > MAX && quality > 0.1);
-
-  return blob;
+  return new Promise(res => canvas.toBlob(res, 'image/webp', QUALITY));
 }
 
 function escAttr(str) {
