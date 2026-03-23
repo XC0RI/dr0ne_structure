@@ -148,8 +148,7 @@ html, body {
 
 /* Archive table */
 #archive-table {
-  width: calc(100% + 2 * var(--pad));
-  margin-left: calc(-1 * var(--pad));
+  width: 100%;
   border-collapse: collapse;
   font-size: var(--fs-info);
   color: var(--white);
@@ -169,22 +168,22 @@ html, body {
   letter-spacing: 0.03em;
 }
 
-#archive-table th:first-child,
-#archive-table td:first-child {
-  padding-left: var(--pad);
-}
-
-#archive-table th:last-child,
-#archive-table td:last-child {
-  padding-right: var(--pad);
-  width: 100%;
-}
 
 #archive-table th[style*="cursor"] {
   opacity: 0.85;
   transition: opacity 0.15s;
 }
 #archive-table th[style*="cursor"]:hover { opacity: 1; }
+
+/* Admin column: no width when empty */
+#archive-table th.admin-col,
+#archive-table td.admin-col {
+  width: 0;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  white-space: nowrap;
+}
 
 
 #archive-table tbody tr {
