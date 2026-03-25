@@ -183,106 +183,171 @@
     document.getElementById('login-cancel').addEventListener('click', hideLoginModal);
   </script>
 
-  <!-- html2canvas for screenshot -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     document.getElementById('screenshot-btn').addEventListener('click', async () => {
-      const btn        = document.getElementById('screenshot-btn');
-      const flash      = document.getElementById('screenshot-flash');
-      const collage    = document.getElementById('collage-stack');
-      const droneLabel = document.getElementById('drone-label');
+      const btn   = document.getElementById('screenshot-btn');
+      const flash = document.getElementById('screenshot-flash');
 
-      // Hide only the button (DR0NE label stays visible)
       btn.style.visibility = 'hidden';
 
       try {
-        // Capture the collage + DR0NE (both visible)
-        // Render each frame individually and composite onto a final canvas
-        const dpr    = window.devicePixelRatio || 1;
-        const vw     = window.innerWidth;
-        const vh     = window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+        const vw  = window.innerWidth;
+        const vh  = window.innerHeight;
 
+        // Final canvas = exact viewport size
+        const canvas = document.createElement('canvas');
+        canvas.width  = vw * dpr;
+        canvas.height = vh * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        // Black background
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, vw, vh);
+
+        // Draw each frame: replicate object-fit:cover + transform:scale/translate
         const frames = document.querySelectorAll('.frame');
-        const final  = document.createElement('canvas');
-        final.width  = vw * dpr;
-        final.height = vh * dpr;
-        const fctx   = final.getContext('2d');
-        fctx.scale(dpr, dpr);
-        fctx.fillStyle = '#000';
-        fctx.fillRect(0, 0, vw, vh);
-
         for (const frame of frames) {
           const rect = frame.getBoundingClientRect();
-          const fc = await html2canvas(frame, {
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: null,
-            scale: dpr,
-            width:  Math.round(rect.width),
-            height: Math.round(rect.height),
-            windowWidth:  vw,
-            windowHeight: vh,
-          });
-          fctx.drawImage(fc, rect.left, rect.top, rect.width, rect.height);
+          const img  = frame.querySelector('img');
+          if (!img || !img.complete) continue;
+
+          const iw = img.naturalWidth;
+          const ih = img.naturalHeight;
+          const fw = rect.width;
+          const fh = rect.height;
+
+          // Parse transform: scale(z) translate(tx%, ty%)
+          const styleTransform = img.style.transform || '';
+          const scaleMatch     = styleTransform.match(/scale\(([\d.]+)\)/);
+          const translateMatch = styleTransform.match(/translate\(([-\d.]+)%,\s*([-\d.]+)%\)/);
+          const zoom = scaleMatch     ? parseFloat(scaleMatch[1])     : 1;
+          const tx   = translateMatch ? parseFloat(translateMatch[1]) : 0;
+          const ty   = translateMatch ? parseFloat(translateMatch[2]) : 0;
+
+          // object-fit: cover scale
+          const coverScale = Math.max(fw / iw, fh / ih);
+          const dispW = iw * coverScale;
+          const dispH = ih * coverScale;
+
+          // Center offset for cover
+          let ox = (fw - dispW) / 2;
+          let oy = (fh - dispH) / 2;
+
+          // Apply zoom and translate (translate is % of displayed size * zoom)
+          const zoomedW = dispW * zoom;
+          const zoomedH = dispH * zoom;
+          ox += (fw - zoomedW) / 2;
+          oy += (fh - zoomedH) / 2;
+          ox += (tx / 100) * zoomedW;
+          oy += (ty / 100) * zoomedH;
+
+          // Clip to frame rect
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(rect.left, rect.top, fw, fh);
+          ctx.clip();
+          ctx.drawImage(img, rect.left + ox, rect.top + oy, zoomedW, zoomedH);
+          ctx.restore();
+
+          // Draw frame-info text
+          const info = frame.querySelector('.frame-info');
+          if (info) {
+            const isPortrait  = window.innerHeight > window.innerWidth;
+            const pad         = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pad')) || 24;
+            const fsinfoRaw   = getComputedStyle(info).fontSize;
+            const fsinfo      = parseFloat(fsinfoRaw) || 11;
+            const isLastFrame = frame === frames[frames.length - 1];
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(rect.left, rect.top, fw, fh);
+            ctx.clip();
+
+            ctx.font         = `500 ${fsinfo}px GeistDr0ne, sans-serif`;
+            ctx.fillStyle    = 'rgba(255,255,255,0.95)';
+            ctx.textBaseline = 'bottom';
+            ctx.shadowColor  = 'rgba(0,0,0,0.4)';
+            ctx.shadowBlur   = 8;
+
+            const lines = Array.from(info.querySelectorAll('p')).map(p => p.textContent.trim()).filter(Boolean);
+            const lineH = fsinfo * 1.5;
+            const totalH = lines.length * lineH;
+
+            let textX, textY;
+            if (isPortrait) {
+              textX = rect.left + pad;
+              textY = rect.bottom - pad;
+              ctx.textAlign = 'left';
+            } else if (isLastFrame) {
+              textX = rect.right - pad;
+              textY = rect.bottom - pad;
+              ctx.textAlign = 'right';
+            } else {
+              textX = rect.left + pad;
+              textY = rect.bottom - pad;
+              ctx.textAlign = 'left';
+            }
+
+            // Draw lines bottom to top
+            for (let i = lines.length - 1; i >= 0; i--) {
+              ctx.fillText(lines[i], textX, textY);
+              textY -= lineH;
+            }
+            ctx.restore();
+          }
         }
 
         // Draw DR0NE label
-        const dl   = document.getElementById('drone-label');
-        const dlR  = dl.getBoundingClientRect();
-        const dlC  = await html2canvas(dl, {
-          useCORS: true, backgroundColor: null, scale: dpr,
-          width: Math.round(dlR.width), height: Math.round(dlR.height),
-          windowWidth: vw, windowHeight: vh,
-        });
-        fctx.drawImage(dlC, dlR.left, dlR.top, dlR.width, dlR.height);
-
-        const canvas = final;
-
-        // Draw watermark diagonally
-        const ctx = canvas.getContext('2d');
-        const w   = canvas.width;
-        const h   = canvas.height;
-
-        // Font size matches --fs-info (approx 1/3 of clamp(24px,6vw,38px))
-        const fontSize = Math.round(Math.min(Math.max(window.innerWidth * 0.06, 24), 38) / 3 * dpr);
+        const dl    = document.getElementById('drone-label');
+        const dlR   = dl.getBoundingClientRect();
+        const fsRaw = getComputedStyle(dl).fontSize;
+        const fs    = parseFloat(fsRaw) || 28;
         ctx.save();
-        ctx.font         = `500 ${fontSize}px GeistDr0ne, sans-serif`;
+        ctx.font         = `500 ${fs}px GeistDr0ne, sans-serif`;
+        ctx.fillStyle    = '#ffffff';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor  = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur   = 16;
+        ctx.fillText('DR0NE', dlR.left + dlR.width / 2, dlR.top + dlR.height / 2);
+        ctx.restore();
+
+        // Watermark
+        ctx.save();
+        const wmSize = Math.round(fs / 3 * dpr);
+        ctx.font         = `500 ${wmSize}px GeistDr0ne, sans-serif`;
         ctx.fillStyle    = 'rgba(255,255,255,0.13)';
         ctx.textBaseline = 'middle';
-
-        const text    = 'https://dr0ne.world ';
-        const metrics = ctx.measureText(text);
-        const tw      = metrics.width;          // no extra gap — text repeats flush
-        const th      = fontSize * 2.5;
-
-        ctx.translate(w / 2, h / 2);
+        const wmText    = 'https://dr0ne.world ';
+        const wmMetrics = ctx.measureText(wmText);
+        const tw        = wmMetrics.width;
+        const th        = wmSize * 2.5;
+        const cw        = canvas.width;
+        const ch        = canvas.height;
+        ctx.translate(cw / 2, ch / 2);
         ctx.rotate(-35 * Math.PI / 180);
-
-        const diag = Math.sqrt(w * w + h * h);
+        const diag = Math.sqrt(cw * cw + ch * ch);
         const cols = Math.ceil(diag / tw) + 2;
         const rows = Math.ceil(diag / th) + 2;
-
         for (let row = -rows; row <= rows; row++) {
           for (let col = -cols; col <= cols; col++) {
-            ctx.fillText(text, col * tw, row * th);
+            ctx.fillText(wmText, col * tw, row * th);
           }
         }
         ctx.restore();
 
-        // Convert to blob
+        // Flash + download
         const dataUrl = canvas.toDataURL('image/png');
-
-        // Show flash overlay for 1 second
-        flash.innerHTML = `<img src="${dataUrl}" alt="screenshot"/>`;
+        flash.innerHTML = `<img src="${dataUrl}" alt="screenshot" style="width:100%;height:100%;object-fit:contain;display:block;background:#000"/>`;
         flash.style.display = 'block';
 
-        // Trigger download
         const a = document.createElement('a');
         a.href     = dataUrl;
         a.download = `dr0ne-${Date.now()}.png`;
         a.click();
 
-        // Hide flash after 1s
         setTimeout(() => {
           flash.style.display = 'none';
           flash.innerHTML = '';
