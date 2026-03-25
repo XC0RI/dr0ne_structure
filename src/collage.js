@@ -177,9 +177,10 @@ let touchStartY = 0;
 
 function attachScrollListeners() {
   // One wheel event → one collage, then blocked until animation completes
-  window.addEventListener('wheel', (e) => {
+  // Listen on document to ensure Mac trackpad events are captured immediately
+  document.addEventListener('wheel', (e) => {
     if (archiveOpen) return;
-    if (e.deltaY > 0) advanceCollage();
+    if (e.deltaY > 3) advanceCollage();  // small threshold filters micro-movements
   }, { passive: true });
 
   // Touch swipe up
