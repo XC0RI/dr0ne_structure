@@ -157,7 +157,7 @@ html, body {
   color: var(--white);
 }
 
-/* Fixed column widths — full desktop */
+/* Fixed column widths — proportional, responsive via % */
 #archive-table col.col-thumb    { width: 52px; }
 #archive-table col.col-position { width: 5%; }
 #archive-table col.col-date     { width: 6%; }
@@ -170,104 +170,23 @@ html, body {
 #archive-table col.col-txt      { width: auto; }
 #archive-table col.col-admin    { width: 0; }
 
-/* Default: no wrap, clip overflow — never break mid-word */
+/* Default: no wrap, clip overflow */
 #archive-table td,
 #archive-table th {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: normal;
 }
 
-/* made_by2 and title: allow up to 5 line wraps, but no mid-word breaks */
+/* Wrap allowed in made_by2, title, txt — but never break mid-word */
 #archive-table td.made_by2,
-#archive-table td.title {
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: normal;
-  overflow-wrap: normal;
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-}
-
-/* txt: same wrapping rules */
+#archive-table td.title,
 #archive-table td.txt {
   white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: normal;
-  overflow-wrap: normal;
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-}
-
-/* position and made_by: always single line, never truncated */
-#archive-table td.position,
-#archive-table th.position,
-#archive-table td.made_by,
-#archive-table th.made_by {
-  white-space: nowrap;
   overflow: visible;
   text-overflow: clip;
-}
-
-/* ── Responsive: progressive column hiding ───────────────── */
-
-/* Step 1 — hide txt (below ~1100px), title fills space */
-@media (max-width: 1100px) {
-  #archive-table col.col-txt      { width: 0; }
-  #archive-table td.txt,
-  #archive-table th.txt           { display: none; }
-  #archive-table col.col-title    { width: auto; }
-}
-
-/* Step 2 — hide location (below ~900px) */
-@media (max-width: 900px) {
-  #archive-table col.col-location { width: 0; }
-  #archive-table td.location,
-  #archive-table th.location      { display: none; }
-  #archive-table col.col-title    { width: auto; }
-}
-
-/* Step 3 — hide 1st (below ~750px), fix critical column widths */
-@media (max-width: 750px) {
-  #archive-table col.col-first    { width: 0; }
-  #archive-table td.first_pub,
-  #archive-table th.first_pub     { display: none; }
-  #archive-table col.col-thumb    { width: 48px; }
-  #archive-table col.col-position { width: 40px; }
-  #archive-table col.col-date     { width: 44px; }
-  #archive-table col.col-made-by  { width: 72px; }
-  #archive-table col.col-made-by2 { width: 20%; }
-  #archive-table col.col-title    { width: auto; }
-}
-
-/* Step 4 — hide type (below ~600px) */
-@media (max-width: 600px) {
-  #archive-table col.col-type     { width: 0; }
-  #archive-table td.type,
-  #archive-table th.type          { display: none; }
-  #archive-table col.col-thumb    { width: 48px; }
-  #archive-table col.col-position { width: 40px; }
-  #archive-table col.col-date     { width: 44px; }
-  #archive-table col.col-made-by  { width: 72px; }
-  #archive-table col.col-made-by2 { width: 22%; }
-  #archive-table col.col-title    { width: auto; }
-}
-
-/* Step 5 — hide date (below ~500px) */
-@media (max-width: 500px) {
-  #archive-table col.col-date     { width: 0; }
-  #archive-table td.date,
-  #archive-table th.date          { display: none; }
-  #archive-table col.col-thumb    { width: 48px; }
-  #archive-table col.col-position { width: 40px; }
-  #archive-table col.col-made-by  { width: 72px; }
-  #archive-table col.col-made-by2 { width: 25%; }
-  #archive-table col.col-title    { width: auto; }
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 #archive-table thead tr {
@@ -318,15 +237,11 @@ html, body {
 
 #archive-table td.thumb {
   width: 48px;
-  min-width: 48px;
   cursor: pointer;
 }
 #archive-table td.thumb img {
   width: 40px;
   height: 40px;
-  min-width: 40px;
-  min-height: 40px;
-  aspect-ratio: 1 / 1;
   object-fit: cover;
   display: block;
 }
