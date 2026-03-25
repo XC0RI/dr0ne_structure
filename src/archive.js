@@ -113,6 +113,7 @@ export function renderTableHeader() {
 
   COLUMNS.forEach(col => {
     const th = document.createElement('th');
+    th.className = col.key;
     th.textContent = col.label;
 
     if (col.sortable) {
