@@ -242,7 +242,6 @@
         const ctx = canvas.getContext('2d');
         const w   = canvas.width;
         const h   = canvas.height;
-        const dpr = window.devicePixelRatio || 1;
 
         // Font size matches --fs-info (approx 1/3 of clamp(24px,6vw,38px))
         const fontSize = Math.round(Math.min(Math.max(window.innerWidth * 0.06, 24), 38) / 3 * dpr);
