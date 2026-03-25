@@ -218,7 +218,7 @@
           const fw = rect.width;
           const fh = rect.height;
 
-          // Parse transform: scale(z) translate(tx%, ty%)
+          // Parse transform from inline style: scale(z) translate(tx%, ty%)
           const styleTransform = img.style.transform || '';
           const scaleMatch     = styleTransform.match(/scale\(([\d.]+)\)/);
           const translateMatch = styleTransform.match(/translate\(([-\d.]+)%,\s*([-\d.]+)%\)/);
@@ -226,73 +226,87 @@
           const tx   = translateMatch ? parseFloat(translateMatch[1]) : 0;
           const ty   = translateMatch ? parseFloat(translateMatch[2]) : 0;
 
-          // object-fit: cover: scale image to fill frame
+          // object-fit: cover
           const coverScale = Math.max(fw / iw, fh / ih);
           const dispW = iw * coverScale;
           const dispH = ih * coverScale;
-          const zoomedW = dispW * zoom;
-          const zoomedH = dispH * zoom;
 
-          // CSS transform: scale(zoom) translate(tx%, ty%) with transform-origin: center
-          // Applied to img element which fills the frame exactly (fw x fh).
-          // Any point at element-coords (px, py) maps to screen:
-          //   screen = rect.topleft + fw/2 + zoom*(px - fw/2 + tx%*fw)  [x]
-          //   screen = rect.topleft + fh/2 + zoom*(py - fh/2 + ty%*fh)  [y]
-          // Cover image top-left in element-coords: ((fw-dispW)/2, (fh-dispH)/2)
-          const ox = rect.left + fw / 2 + zoom * ((fw - dispW) / 2 - fw / 2 + (tx / 100) * fw);
-          const oy = rect.top  + fh / 2 + zoom * ((fh - dispH) / 2 - fh / 2 + (ty / 100) * fh);
-
-          // Clip to frame rect
+          // Replicate CSS transform exactly using canvas transforms:
+          // transform-origin: center → translate to center, apply scale+translate, translate back
           ctx.save();
           ctx.beginPath();
           ctx.rect(rect.left, rect.top, fw, fh);
           ctx.clip();
-          ctx.drawImage(img, rect.left + ox, rect.top + oy, zoomedW, zoomedH);
+
+          // Move to frame center
+          ctx.translate(rect.left + fw / 2, rect.top + fh / 2);
+          // Apply scale
+          ctx.scale(zoom, zoom);
+          // Apply translate (% of frame size)
+          ctx.translate((tx / 100) * fw, (ty / 100) * fh);
+          // Draw image centered (cover already centers it)
+          ctx.drawImage(img, -dispW / 2, -dispH / 2, dispW, dispH);
           ctx.restore();
 
           // Draw frame-info text
           const info = frame.querySelector('.frame-info');
           if (info) {
-            const isPortrait  = window.innerHeight > window.innerWidth;
-            const pad         = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pad')) || 24;
-            const fsinfoRaw   = getComputedStyle(info).fontSize;
-            const fsinfo      = parseFloat(fsinfoRaw) || 11;
-            const isLastFrame = frame === frames[frames.length - 1];
+            const isPortrait = window.innerHeight > window.innerWidth;
+            const pad        = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pad')) || 24;
+            const fsinfo     = parseFloat(getComputedStyle(info).fontSize) || 11;
+            const isLeft     = rect.left < vw / 2;  // true = left frame, false = right frame
+            const isTop      = rect.top  < vh / 2;  // true = top frame (portrait), false = bottom
 
             ctx.save();
             ctx.beginPath();
             ctx.rect(rect.left, rect.top, fw, fh);
             ctx.clip();
-
             ctx.font         = `500 ${fsinfo}px GeistDr0ne, sans-serif`;
             ctx.fillStyle    = 'rgba(255,255,255,0.95)';
-            ctx.textBaseline = 'bottom';
             ctx.shadowColor  = 'rgba(0,0,0,0.4)';
             ctx.shadowBlur   = 8;
 
             const lines = Array.from(info.querySelectorAll('p')).map(p => p.textContent.trim()).filter(Boolean);
-            const lineH = fsinfo * 1.5;
-            const totalH = lines.length * lineH;
+            const lineH  = fsinfo * 1.5;
 
-            let textX, textY;
+            let textX, textY, baseline, direction;
+
             if (isPortrait) {
-              textX = rect.left + pad;
-              textY = rect.bottom - pad;
-              ctx.textAlign = 'left';
-            } else if (isLastFrame) {
-              textX = rect.right - pad;
-              textY = rect.bottom - pad;
-              ctx.textAlign = 'right';
+              // Portrait: left-aligned, top frame → top-left, bottom frame → bottom-left
+              textX     = rect.left + pad;
+              ctx.textAlign    = 'left';
+              if (isTop) {
+                // top frame: draw from top down
+                baseline = 'top';
+                ctx.textBaseline = 'top';
+                textY = rect.top + pad;
+                for (let i = 0; i < lines.length; i++) {
+                  ctx.fillText(lines[i], textX, textY + i * lineH);
+                }
+              } else {
+                // bottom frame: draw from bottom up
+                ctx.textBaseline = 'bottom';
+                textY = rect.bottom - pad;
+                for (let i = lines.length - 1; i >= 0; i--) {
+                  ctx.fillText(lines[i], textX, textY);
+                  textY -= lineH;
+                }
+              }
             } else {
-              textX = rect.left + pad;
+              // Landscape: left frame → bottom-left, right frame → bottom-right
+              ctx.textBaseline = 'bottom';
               textY = rect.bottom - pad;
-              ctx.textAlign = 'left';
-            }
-
-            // Draw lines bottom to top
-            for (let i = lines.length - 1; i >= 0; i--) {
-              ctx.fillText(lines[i], textX, textY);
-              textY -= lineH;
+              if (isLeft) {
+                textX = rect.left + pad;
+                ctx.textAlign = 'left';
+              } else {
+                textX = rect.right - pad;
+                ctx.textAlign = 'right';
+              }
+              for (let i = lines.length - 1; i >= 0; i--) {
+                ctx.fillText(lines[i], textX, textY);
+                textY -= lineH;
+              }
             }
             ctx.restore();
           }
@@ -315,7 +329,7 @@
 
         // Watermark
         ctx.save();
-        const wmSize = Math.round(fs / 3 * dpr);
+        const wmSize = Math.round(fs / 3);
         ctx.font         = `500 ${wmSize}px GeistDr0ne, sans-serif`;
         ctx.fillStyle    = 'rgba(255,255,255,0.13)';
         ctx.textBaseline = 'middle';
@@ -323,8 +337,8 @@
         const wmMetrics = ctx.measureText(wmText);
         const tw        = wmMetrics.width;
         const th        = wmSize * 2.5;
-        const cw        = canvas.width;
-        const ch        = canvas.height;
+        const cw        = vw;
+        const ch        = vh;
         ctx.translate(cw / 2, ch / 2);
         ctx.rotate(-35 * Math.PI / 180);
         const diag = Math.sqrt(cw * cw + ch * ch);
