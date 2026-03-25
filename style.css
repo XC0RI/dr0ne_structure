@@ -400,3 +400,77 @@ html, body {
   object-fit: contain;
   display: block;
 }
+
+/* ─── Top corner buttons (hide + info) ──────────────────── */
+#hide-btn,
+#info-btn {
+  position: fixed;
+  top: var(--pad);
+  z-index: 100;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--white);
+  line-height: 1;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+#hide-btn:hover,
+#info-btn:hover { opacity: 1; }
+
+#hide-btn { left: var(--pad); }
+#info-btn  { right: var(--pad); }
+
+#hide-btn svg,
+#info-btn svg {
+  width: var(--fs-info);
+  height: var(--fs-info);
+  display: block;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
+}
+
+/* ─── Info panel ─────────────────────────────────────────── */
+#info-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 50vh;              /* max half screen height */
+  z-index: 99;
+  width: clamp(260px, 35vw, 480px);
+  padding: var(--pad);
+  padding-top: calc(var(--pad) * 2 + var(--fs-info) + 12px); /* below info btn */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+  pointer-events: none;
+}
+
+#info-panel.open {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+#info-panel p {
+  font-size: var(--fs-info);
+  font-family: var(--font-main);
+  font-weight: 500;
+  color: var(--white);
+  text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+  line-height: 1.5;
+  word-break: normal;
+  overflow-wrap: break-word;
+  margin-bottom: 1.2em;
+}
+
+#info-panel p:last-child { margin-bottom: 0; }
+
+#info-panel a {
+  color: var(--white);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+#info-panel a:hover { opacity: 0.7; }
