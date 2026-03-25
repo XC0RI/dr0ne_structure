@@ -262,7 +262,9 @@
               ctx.fillStyle    = '#ffffff';
               ctx.shadowColor  = 'rgba(0,0,0,0.4)';
               ctx.shadowBlur   = 8;
-              ctx.textBaseline = 'top';
+              ctx.shadowOffsetX = 0;
+              ctx.shadowOffsetY = 1;
+              ctx.textBaseline = 'hanging';
               ctx.textAlign    = 'left';
               for (const p of ps) {
                 const pr = p.getBoundingClientRect();
@@ -281,7 +283,14 @@
         ctx.font         = `normal ${fs}px GeistDr0ne, sans-serif`;
         ctx.fillStyle    = '#ffffff';
         ctx.textAlign    = 'left';
-        ctx.textBaseline = 'top';
+        ctx.textBaseline = 'hanging';
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 1;
+        ctx.shadowColor  = 'rgba(0,0,0,0.6)';
+        ctx.shadowBlur   = 4;
+        ctx.fillText('DR0NE', dlR.left, dlR.top);
+        // Second pass for the wider shadow layer
+        ctx.shadowOffsetY = 2;
         ctx.shadowColor  = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur   = 16;
         ctx.fillText('DR0NE', dlR.left, dlR.top);
