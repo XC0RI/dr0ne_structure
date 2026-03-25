@@ -425,8 +425,8 @@ html, body {
 
 #hide-btn svg,
 #info-btn svg {
-  width: var(--fs-info);
-  height: var(--fs-info);
+  width: calc(var(--fs-info) * 2);
+  height: calc(var(--fs-info) * 2);
   display: block;
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
 }
