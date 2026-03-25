@@ -168,47 +168,47 @@ html, body {
   word-break: normal;
 }
 
-/* thumbnail: fixed, always square */
-#archive-table td.thumb     { width: 44px; min-width: 44px; }
+/* thumbnail: fixed 52px, always square */
+#archive-table td.thumb     { width: 52px; min-width: 52px; }
 #archive-table td.thumb img { width: 40px; height: 40px; min-width: 40px; min-height: 40px; aspect-ratio: 1/1; object-fit: cover; display: block; }
 
-/* position: fixed width, never truncated */
+/* position: never truncated */
 #archive-table td.position,
-#archive-table th.position  { min-width: 36px; width: 36px; overflow: visible; text-overflow: clip; }
+#archive-table th.position  { width: 5%; min-width: 36px; overflow: visible; text-overflow: clip; white-space: nowrap; }
 
 /* date */
 #archive-table td.date,
-#archive-table th.date      { min-width: 42px; width: 5%; }
+#archive-table th.date      { width: 6%; min-width: 42px; }
 
 /* made_by: never truncated */
 #archive-table td.made_by,
-#archive-table th.made_by   { min-width: 68px; width: 9%; overflow: visible; text-overflow: clip; }
+#archive-table th.made_by   { width: 9%; min-width: 68px; overflow: visible; text-overflow: clip; white-space: nowrap; }
 
 /* made_by2: up to 5 lines, no mid-word break */
 #archive-table td.made_by2,
-#archive-table th.made_by2  { min-width: 80px; width: 11%; }
+#archive-table th.made_by2  { width: 11%; min-width: 60px; }
 #archive-table td.made_by2  { white-space: normal; overflow: hidden; word-break: normal; overflow-wrap: normal; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
 
 /* type */
 #archive-table td.type,
-#archive-table th.type      { min-width: 60px; width: 8%; }
+#archive-table th.type      { width: 8%; min-width: 50px; }
 
 /* 1st */
 #archive-table td.first_pub,
-#archive-table th.first_pub { min-width: 28px; width: 4%; }
+#archive-table th.first_pub { width: 4%; min-width: 28px; }
 
-/* title: up to 5 lines, no mid-word break, fills remaining space */
+/* title: up to 5 lines, no mid-word break */
 #archive-table td.title,
-#archive-table th.title     { min-width: 100px; width: auto; }
+#archive-table th.title     { width: 22%; min-width: 80px; }
 #archive-table td.title     { white-space: normal; overflow: hidden; word-break: normal; overflow-wrap: normal; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
 
 /* location */
 #archive-table td.location,
-#archive-table th.location  { min-width: 70px; width: 9%; }
+#archive-table th.location  { width: 9%; min-width: 60px; }
 
 /* txt: up to 5 lines */
 #archive-table td.txt,
-#archive-table th.txt       { min-width: 120px; width: auto; }
+#archive-table th.txt       { width: 26%; min-width: 80px; }
 #archive-table td.txt       { white-space: normal; overflow: hidden; word-break: normal; overflow-wrap: normal; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
 
 /* ── Progressive column hiding ───────────────────────────── */
