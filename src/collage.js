@@ -176,31 +176,28 @@ function advanceCollage() {
 let touchStartY = 0;
 
 function attachScrollListeners() {
-  const wheelHandler = (e) => {
+  // Create an invisible full-screen div to capture scroll/touch events.
+  // This bypasses Safari's issue with wheel events on overflow:hidden body.
+  const catcher = document.createElement('div');
+  catcher.style.cssText = [
+    'position:fixed', 'inset:0', 'z-index:1',
+    'pointer-events:auto', 'touch-action:none'
+  ].join(';');
+  document.body.appendChild(catcher);
+
+  // Wheel
+  catcher.addEventListener('wheel', (e) => {
     if (archiveOpen) return;
     if (e.deltaY > 3) advanceCollage();
-  };
+  }, { passive: true });
 
-  // Safari on Mac requires a user interaction before wheel events fire reliably.
-  // Attach wheel listener immediately, but also re-attach after first click/touch
-  // to ensure Safari has activated the event pipeline.
-  document.addEventListener('wheel', wheelHandler, { passive: true });
-
-  const activate = () => {
-    document.removeEventListener('wheel', wheelHandler, { passive: true });
-    document.addEventListener('wheel', wheelHandler, { passive: true });
-    document.removeEventListener('click', activate);
-    document.removeEventListener('touchstart', activate);
-  };
-  document.addEventListener('click', activate, { once: true });
-  document.addEventListener('touchstart', activate, { once: true, passive: true });
-
-  // Touch swipe up
-  window.addEventListener('touchstart', (e) => {
+  // Touch swipe — override the window listeners below
+  catcher.addEventListener('touchstart', (e) => {
     touchStartY = e.touches[0].clientY;
   }, { passive: true });
 
-  window.addEventListener('touchend', (e) => {
+  catcher.addEventListener('touchend', (e) => {
+    if (archiveOpen) return;
     const delta = touchStartY - e.changedTouches[0].clientY;
     if (delta > 60) advanceCollage();
   }, { passive: true });
