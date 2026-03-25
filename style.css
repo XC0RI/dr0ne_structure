@@ -356,3 +356,45 @@ html, body {
 
 /* ─── Utilities ──────────────────────────────────────────── */
 .hidden { display: none !important; }
+/* ─── Screenshot button ──────────────────────────────────── */
+#screenshot-btn {
+  position: fixed;
+  bottom: var(--pad);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--white);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6), 0 2px 16px rgba(0,0,0,0.5);
+  opacity: 0.85;
+  transition: opacity 0.15s;
+  line-height: 1;
+}
+
+#screenshot-btn:hover { opacity: 1; }
+
+#screenshot-btn svg {
+  width: var(--fs-info);
+  height: var(--fs-info);
+  display: block;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
+}
+
+/* Screenshot flash overlay */
+#screenshot-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: none;
+  background: #000;
+}
+
+#screenshot-flash img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
