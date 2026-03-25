@@ -18,6 +18,21 @@
     DR0NE
   </div>
 
+  <!-- ── Screenshot button ───────────────────────────────────────────── -->
+  <button id="screenshot-btn" aria-label="Screenshot">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <!-- crosshair -->
+      <line x1="12" y1="2"  x2="12" y2="7"/>
+      <line x1="12" y1="17" x2="12" y2="22"/>
+      <line x1="2"  y1="12" x2="7"  y2="12"/>
+      <line x1="17" y1="12" x2="22" y2="12"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  </button>
+
+  <!-- ── Screenshot flash overlay ─────────────────────────────────────── -->
+  <div id="screenshot-flash"></div>
+
   <!-- ── Archive overlay ──────────────────────────────────────────────── -->
   <div id="archive-overlay" role="dialog" aria-label="Archive" aria-modal="true">
     <div id="admin-bar" class="admin-controls"></div>
@@ -162,6 +177,96 @@
     });
 
     document.getElementById('login-cancel').addEventListener('click', hideLoginModal);
+  </script>
+
+  <!-- html2canvas for screenshot -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script>
+    document.getElementById('screenshot-btn').addEventListener('click', async () => {
+      const btn        = document.getElementById('screenshot-btn');
+      const flash      = document.getElementById('screenshot-flash');
+      const collage    = document.getElementById('collage-stack');
+      const droneLabel = document.getElementById('drone-label');
+
+      // Hide only the button (DR0NE label stays visible)
+      btn.style.visibility = 'hidden';
+
+      try {
+        // Capture the collage + DR0NE (both visible)
+        const canvas = await html2canvas(document.body, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#000000',
+          scale: window.devicePixelRatio || 1,
+          ignoreElements: (el) => {
+            // Exclude everything except collage and drone-label
+            const keep = ['collage-stack', 'drone-label'];
+            if (keep.includes(el.id)) return false;
+            if (el.id === 'screenshot-flash') return true;
+            if (el.id === 'screenshot-btn')   return true;
+            if (el.id === 'archive-overlay')  return true;
+            if (el.id === 'modal-overlay')    return true;
+            if (el.id === 'login-overlay')    return true;
+            if (el.id === 'admin-bar')        return true;
+            if (el.id === 'filter-bar')       return true;
+            return false;
+          }
+        });
+
+        // Draw watermark diagonally
+        const ctx = canvas.getContext('2d');
+        const w   = canvas.width;
+        const h   = canvas.height;
+        const dpr = window.devicePixelRatio || 1;
+
+        // Font size matches --fs-info (approx 1/3 of clamp(24px,6vw,38px))
+        const fontSize = Math.round(Math.min(Math.max(window.innerWidth * 0.06, 24), 38) / 3 * dpr);
+        ctx.save();
+        ctx.font         = `500 ${fontSize}px GeistDr0ne, sans-serif`;
+        ctx.fillStyle    = 'rgba(255,255,255,0.13)';
+        ctx.textBaseline = 'middle';
+
+        const text    = 'https://dr0ne.world';
+        const metrics = ctx.measureText(text);
+        const tw      = metrics.width + fontSize * 4;  // spacing between repeats
+        const th      = fontSize * 3.5;
+
+        ctx.translate(w / 2, h / 2);
+        ctx.rotate(-35 * Math.PI / 180);
+
+        const cols = Math.ceil(Math.sqrt(w * w + h * h) / tw) + 2;
+        const rows = Math.ceil(Math.sqrt(w * w + h * h) / th) + 2;
+
+        for (let row = -rows; row <= rows; row++) {
+          for (let col = -cols; col <= cols; col++) {
+            ctx.fillText(text, col * tw, row * th);
+          }
+        }
+        ctx.restore();
+
+        // Convert to blob
+        const dataUrl = canvas.toDataURL('image/png');
+
+        // Show flash overlay for 1 second
+        flash.innerHTML = `<img src="${dataUrl}" alt="screenshot"/>`;
+        flash.style.display = 'block';
+
+        // Trigger download
+        const a = document.createElement('a');
+        a.href     = dataUrl;
+        a.download = `dr0ne-${Date.now()}.png`;
+        a.click();
+
+        // Hide flash after 1s
+        setTimeout(() => {
+          flash.style.display = 'none';
+          flash.innerHTML = '';
+        }, 1000);
+
+      } finally {
+        btn.style.visibility = '';
+      }
+    });
   </script>
 </body>
 </html>
