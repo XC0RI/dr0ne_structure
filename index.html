@@ -261,13 +261,13 @@
             ctx.beginPath();
             ctx.rect(rect.left, rect.top, fw, fh);
             ctx.clip();
-            ctx.font         = `500 ${fsinfo}px GeistDr0ne, sans-serif`;
+            ctx.font         = `500 ${fsinfo / dpr}px GeistDr0ne, sans-serif`;
             ctx.fillStyle    = 'rgba(255,255,255,0.95)';
             ctx.shadowColor  = 'rgba(0,0,0,0.4)';
             ctx.shadowBlur   = 4;
 
             const lines = Array.from(info.querySelectorAll('p')).map(p => p.textContent.trim()).filter(Boolean);
-            const lineH  = fsinfo * 1.5;
+            const lineH  = (fsinfo / dpr) * 1.5;
 
             let textX, textY, baseline, direction;
 
@@ -318,7 +318,7 @@
         const fsRaw = getComputedStyle(dl).fontSize;
         const fs    = parseFloat(fsRaw) || 28;
         ctx.save();
-        ctx.font         = `500 ${fs}px GeistDr0ne, sans-serif`;
+        ctx.font         = `500 ${fs / dpr}px GeistDr0ne, sans-serif`;
         ctx.fillStyle    = '#ffffff';
         ctx.textAlign    = 'center';
         ctx.textBaseline = 'middle';
