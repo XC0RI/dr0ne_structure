@@ -156,10 +156,20 @@ html, body {
   color: var(--white);
 }
 
-/* ── Table layout: auto so browser distributes proportionally ── */
-/* col elements removed — min-width on cells drives layout      */
+/* Column widths: thumb fixed, rest proportional summing to 100% */
+#archive-table col.col-thumb    { width: 52px; }
+#archive-table col.col-position { width: 5%; }
+#archive-table col.col-date     { width: 6%; }
+#archive-table col.col-made-by  { width: 9%; }
+#archive-table col.col-made-by2 { width: 11%; }
+#archive-table col.col-type     { width: 8%; }
+#archive-table col.col-first    { width: 4%; }
+#archive-table col.col-title    { width: 22%; }
+#archive-table col.col-location { width: 9%; }
+#archive-table col.col-txt      { width: 26%; }
+#archive-table col.col-admin    { width: 0; }
 
-/* ── Cell defaults ───────────────────────────────────────────── */
+/* Default: no wrap, clip overflow, no mid-word break */
 #archive-table td,
 #archive-table th {
   white-space: nowrap;
@@ -168,74 +178,18 @@ html, body {
   word-break: normal;
 }
 
-/* thumbnail: fixed 52px, always square */
-#archive-table td.thumb     { width: 52px; min-width: 52px; }
-#archive-table td.thumb img { width: 40px; height: 40px; min-width: 40px; min-height: 40px; aspect-ratio: 1/1; object-fit: cover; display: block; }
-
-/* position: never truncated */
-#archive-table td.position,
-#archive-table th.position  { width: 5%; min-width: 36px; overflow: visible; text-overflow: clip; white-space: nowrap; }
-
-/* date */
-#archive-table td.date,
-#archive-table th.date      { width: 6%; min-width: 42px; }
-
-/* made_by: never truncated */
-#archive-table td.made_by,
-#archive-table th.made_by   { width: 9%; min-width: 68px; overflow: visible; text-overflow: clip; white-space: nowrap; }
-
-/* made_by2: up to 5 lines, no mid-word break */
+/* Wrap allowed in made_by2, title, txt — but never break mid-word */
 #archive-table td.made_by2,
-#archive-table th.made_by2  { width: 11%; min-width: 60px; }
-#archive-table td.made_by2  { white-space: normal; overflow: hidden; word-break: normal; overflow-wrap: normal; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
-
-/* type */
-#archive-table td.type,
-#archive-table th.type      { width: 8%; min-width: 50px; }
-
-/* 1st */
-#archive-table td.first_pub,
-#archive-table th.first_pub { width: 4%; min-width: 28px; }
-
-/* title: up to 5 lines, no mid-word break */
 #archive-table td.title,
-#archive-table th.title     { width: 22%; min-width: 80px; }
-#archive-table td.title     { white-space: normal; overflow: hidden; word-break: normal; overflow-wrap: normal; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
-
-/* location */
-#archive-table td.location,
-#archive-table th.location  { width: 9%; min-width: 60px; }
-
-/* txt: up to 5 lines */
-#archive-table td.txt,
-#archive-table th.txt       { width: 26%; min-width: 80px; }
-#archive-table td.txt       { white-space: normal; overflow: hidden; word-break: normal; overflow-wrap: normal; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
-
-/* ── Progressive column hiding ───────────────────────────── */
-
-/* hide txt ≤ 900px */
-@media (max-width: 900px) {
-  #archive-table td.txt, #archive-table th.txt { display: none; }
-}
-
-/* hide location ≤ 780px */
-@media (max-width: 780px) {
-  #archive-table td.location, #archive-table th.location { display: none; }
-}
-
-/* hide 1st ≤ 680px */
-@media (max-width: 680px) {
-  #archive-table td.first_pub, #archive-table th.first_pub { display: none; }
-}
-
-/* hide type ≤ 580px */
-@media (max-width: 580px) {
-  #archive-table td.type, #archive-table th.type { display: none; }
-}
-
-/* hide date ≤ 480px */
-@media (max-width: 480px) {
-  #archive-table td.date, #archive-table th.date { display: none; }
+#archive-table td.txt {
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: normal;
+  overflow-wrap: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
 }
 
 #archive-table thead tr {
