@@ -1,498 +1,451 @@
-/* style.css */
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#000000"/>
+  <title>DR0NE</title>
+  <link rel="stylesheet" href="/style.css"/>
+  <link rel="preload" href="/fonts/GeistDr0ne-Medium.woff2" as="font" type="font/woff2" crossorigin/>
+</head>
+<body>
 
-@font-face {
-  font-family: 'GeistDr0ne';
-  src: url('/fonts/GeistDr0ne-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: block;
-}
+  <!-- ── Collage backdrop ─────────────────────────────────────────────── -->
+  <div id="collage-stack"></div>
 
-/* ─── Variables ─────────────────────────────────────────── */
-:root {
-  --fs:      clamp(24px, 6vw, 38px);
-  --fs-info: calc(var(--fs) / 3);
+  <!-- ── DR0NE — static centre label / archive toggle ────────────────── -->
+  <div id="drone-label" role="button" aria-label="Open archive" tabindex="0">
+    DR0NE
+  </div>
 
-  --white:       #ffffff;
-  --black:       #000000;
+  <!-- ── Top-left hide button ─────────────────────────────────────────── -->
+  <button id="hide-btn" aria-label="Hide texts">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="7" y1="12" x2="17" y2="12"/>
+    </svg>
+  </button>
 
-  --font-main: 'GeistDr0ne', sans-serif;
-  --font-mono: 'GeistDr0ne', monospace;
+  <!-- ── Top-right info button ─────────────────────────────────────────── -->
+  <button id="info-btn" aria-label="Info">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="10" x2="12" y2="16"/>
+      <circle cx="12" cy="7.5" r="0.5" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
 
-  --pad: clamp(16px, 3vw, 32px);
-}
+  <!-- ── Info panel ─────────────────────────────────────────────────────── -->
+  <div id="info-panel">
+    <p>Dr0ne is a practice formed by Kian Matine and Philipp Burwinkel in 2025, working across architecture, Kunst am Bau and set design. The work draws from a self-built universe of references across subcultures — driven by an interest in the sublime, violence, and absurdity.</p>
+    <p>Active across Switzerland, with experience from offices in Zurich and Munich.</p>
+    <p>Rendering and Visualization:<br>Gate Visual Studio<br><a href="https://gatevisuals.xyz" target="_blank" rel="noopener">gatevisuals.xyz</a></p>
+  </div>
 
-/* ─── Reset ─────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+  <!-- ── Screenshot button ───────────────────────────────────────────── -->
+  <button id="screenshot-btn" aria-label="Screenshot">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <!-- crosshair -->
+      <line x1="12" y1="2"  x2="12" y2="7"/>
+      <line x1="12" y1="17" x2="12" y2="22"/>
+      <line x1="2"  y1="12" x2="7"  y2="12"/>
+      <line x1="17" y1="12" x2="22" y2="12"/>
+      <circle cx="12" cy="12" r="3"/>
+    </svg>
+  </button>
 
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none;   /* prevents Mac rubber-band from swallowing wheel events */
-  background: var(--black);
-  font-family: var(--font-main);
-  font-weight: 500;
-  color: var(--white);
-  -webkit-font-smoothing: antialiased;
-}
+  <!-- ── Screenshot flash overlay ─────────────────────────────────────── -->
+  <div id="screenshot-flash"></div>
 
-/* ─── Collage Container ──────────────────────────────────── */
-#collage-stack {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-}
+  <!-- ── Archive overlay ──────────────────────────────────────────────── -->
+  <div id="archive-overlay" role="dialog" aria-label="Archive" aria-modal="true">
+    <div id="admin-bar" class="admin-controls"></div>
+    <div id="filter-bar"></div>
 
-.collage {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  transition: opacity 0.5s ease,
-              transform 0.5s cubic-bezier(0.76, 0, 0.24, 1),
-              filter 0.5s ease;
-  will-change: transform, opacity, filter;
-}
+    <table id="archive-table">
+      <thead id="archive-thead"></thead>
+      <tbody id="archive-tbody"></tbody>
+    </table>
+  </div>
 
-@media (orientation: landscape) {
-  .collage { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr; }
-}
-@media (orientation: portrait) {
-  .collage { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
-}
+  <!-- ── Upload / Edit modal ──────────────────────────────────────────── -->
+  <div id="modal-overlay"></div>
 
-/* Blur & dim collage when archive is open — animated via transition above */
-.collage-blurred {
-  filter: blur(12px) brightness(0.9);
-  pointer-events: none;
-  user-select: none;
-}
+  <!-- ── Login modal (separate, simpler) ─────────────────────────────── -->
+  <div id="login-overlay" class="hidden" style="
+    position:fixed;inset:0;z-index:300;
+    background:rgba(0,0,0,0.85);
+    display:flex;align-items:center;justify-content:center;">
+    <div class="modal">
+      <h2>login</h2>
+      <label>password</label>
+      <input type="password" id="login-password" autocomplete="current-password"/>
+      <div class="modal-error" id="login-error"></div>
+      <button class="btn" id="login-submit">enter</button>
+      <button class="btn" id="login-cancel" style="margin-left:8px">cancel</button>
+    </div>
+  </div>
 
-/* ─── Individual image frame ─────────────────────────────── */
-.frame {
-  position: relative;
-  overflow: hidden;
-}
+  <script type="module">
+    import { initCollage, blurCollage, unblurCollage, setArchiveOpen } from '/src/collage.js';
+    import { openArchive, closeArchive, renderTableHeader } from '/src/archive.js';
+    import { openUploadModal, openEditModal }           from '/src/upload-ui.js';
+    import { isLoggedIn, login }                       from '/src/auth.js';
 
-.frame img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    // ── Build archive table header ─────────────────────────────────────
+    renderTableHeader();
 
-/* ─── Info text per frame ────────────────────────────────── */
-.frame-info {
-  position: absolute;
-  z-index: 2;
-  line-height: 1.35;
-  pointer-events: none;
-}
+    // ── Fetch images from D1 ───────────────────────────────────────────
+    let images = [];
+    async function loadImages() {
+      try {
+        const res  = await fetch('/api/images');
+        const data = await res.json();
+        images = data.images ?? [];
+      } catch (err) {
+        console.error('Failed to load images:', err);
+        images = [];
+      }
+    }
 
-@media (orientation: landscape) {
-  .frame:first-child .frame-info { bottom: var(--pad); left: var(--pad);  text-align: left; }
-  .frame:last-child  .frame-info { bottom: var(--pad); right: var(--pad); text-align: right; }
-}
-@media (orientation: portrait) {
-  .frame:first-child .frame-info { top: var(--pad);    bottom: auto; left: var(--pad); text-align: left; }
-  .frame:last-child  .frame-info { bottom: var(--pad); top: auto;    left: var(--pad); text-align: left; }
-}
+    // Expose reload hook for upload/edit modules
+    window.__reloadImages = async () => {
+      await loadImages();
+      if (document.getElementById('archive-overlay').classList.contains('open')) {
+        openArchive(images);
+      }
+    };
 
-.frame-info p {
-  font-size: var(--fs-info);
-  font-family: var(--font-main);
-  font-weight: 500;
-  color: var(--white);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
-  margin: 0;
-  line-height: 1.5;
-}
-.frame-info p:not(:last-child) { margin-bottom: 0.25em; }
+    // Expose modal hooks for archive module
+    window.__openUploadModal = openUploadModal;
+    window.__openEditModal   = openEditModal;
 
-/* ─── DR0NE centre label ─────────────────────────────────── */
-#drone-label {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 100;
-  font-size: var(--fs);
-  color: var(--white);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.6), 0 2px 16px rgba(0,0,0,0.5);
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
-  letter-spacing: -0.01em;
-  line-height: 1;
-}
+    // ── Init ───────────────────────────────────────────────────────────
+    await loadImages();
+    initCollage(images);
 
+    // ── DR0NE click: toggle archive ────────────────────────────────────
+    const droneLabel   = document.getElementById('drone-label');
+    const archiveOverlay = document.getElementById('archive-overlay');
 
-/* ─── Archive Overlay ────────────────────────────────────── */
-#archive-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  overflow-y: auto;
-  overscroll-behavior: contain;   /* prevents scroll bleed to collage */
-  display: none;
-  opacity: 0;
-  padding: var(--pad);
-  padding-top: calc(var(--pad) + var(--fs) + 24px);
-  transition: opacity 0.5s ease;
-}
+    droneLabel.addEventListener('click', () => {
+      const isOpen = archiveOverlay.classList.contains('open');
+      const screenshotBtn = document.getElementById('screenshot-btn');
+      const hideBtn2       = document.getElementById('hide-btn');
+      const infoBtn2       = document.getElementById('info-btn');
+      if (isOpen) {
+        closeArchive();
+        unblurCollage();
+        setArchiveOpen(false);
+        droneLabel.setAttribute('aria-label', 'Open archive');
+        screenshotBtn.style.display = '';
+        hideBtn2.style.display = '';
+        infoBtn2.style.display = '';
+      } else {
+        openArchive(images);
+        blurCollage();
+        setArchiveOpen(true);
+        droneLabel.setAttribute('aria-label', 'Close archive');
+        screenshotBtn.style.display = 'none';
+        hideBtn2.style.display = 'none';
+        infoBtn2.style.display = 'none';
+        document.getElementById('info-panel').classList.remove('open');
+      }
+    });
 
-#archive-overlay.open { display: block; }
+    droneLabel.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        droneLabel.click();
+      }
+    });
 
-/* Archive table */
-#archive-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;          /* columns never resize based on content */
-  font-size: var(--fs-info);
-  color: var(--white);
-}
+    // Escape key closes archive
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && archiveOverlay.classList.contains('open')) {
+        closeArchive();
+        unblurCollage();
+        setArchiveOpen(false);
+        document.getElementById('screenshot-btn').style.display = '';
+        document.getElementById('hide-btn').style.display = '';
+        document.getElementById('info-btn').style.display = '';
+      }
+    });
 
-/* Fixed column widths — proportional, responsive via % */
-#archive-table col.col-thumb    { width: 52px; }
-#archive-table col.col-position { width: 5%; }
-#archive-table col.col-date     { width: 6%; }
-#archive-table col.col-made-by  { width: 8%; }
-#archive-table col.col-made-by2 { width: 10%; }
-#archive-table col.col-type     { width: 8%; }
-#archive-table col.col-first    { width: 4%; }
-#archive-table col.col-title    { width: 22%; }
-#archive-table col.col-location { width: 9%; }
-#archive-table col.col-txt      { width: auto; }
-#archive-table col.col-admin    { width: 0; }
+    // ── Login flow ─────────────────────────────────────────────────────
+    // Hidden login trigger: hold Shift and click DR0NE when archive is open
+    droneLabel.addEventListener('click', (e) => {
+      if (e.shiftKey && !isLoggedIn() && archiveOverlay.classList.contains('open')) {
+        showLoginModal();
+      }
+    });
 
-/* Default: no wrap, clip overflow */
-#archive-table td,
-#archive-table th {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+    function showLoginModal() {
+      const lo = document.getElementById('login-overlay');
+      lo.classList.remove('hidden');
+      lo.style.display = 'flex';
+      document.getElementById('login-password').focus();
+    }
 
-/* Wrap allowed in made_by2, title, txt — but never break mid-word */
-#archive-table td.made_by2,
-#archive-table td.title,
-#archive-table td.txt {
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  word-break: normal;
-  overflow-wrap: break-word;
-}
+    function hideLoginModal() {
+      const lo = document.getElementById('login-overlay');
+      lo.classList.add('hidden');
+      lo.style.display = '';
+      document.getElementById('login-error').textContent = '';
+      document.getElementById('login-password').value = '';
+    }
 
-#archive-table thead tr {
-  border-bottom: 1px solid rgba(255,255,255,0.35);
-}
+    document.getElementById('login-submit').addEventListener('click', async () => {
+      const pw  = document.getElementById('login-password').value;
+      const err = document.getElementById('login-error');
+      err.textContent = '';
+      try {
+        await login(pw);
+        hideLoginModal();
+        // Refresh archive to show admin controls
+        openArchive(images);
+      } catch (e) {
+        err.textContent = e.message;
+      }
+    });
 
-#archive-table th {
-  font-family: var(--font-main);
-  font-weight: 500;
-  text-align: left;
-  padding: 6px 10px;
-  border-bottom: none;
-  white-space: nowrap;
-  letter-spacing: 0.03em;
-}
+    document.getElementById('login-password').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('login-submit').click();
+    });
 
+    document.getElementById('login-cancel').addEventListener('click', hideLoginModal);
 
-#archive-table th[style*="cursor"] {
-  opacity: 0.85;
-  transition: opacity 0.15s;
-}
-#archive-table th[style*="cursor"]:hover { opacity: 1; }
+    // ── Hide/show texts ────────────────────────────────────────────────
+    const hideBtn = document.getElementById('hide-btn');
+    let textsHidden = false;
 
-/* Admin column: no width when empty */
-#archive-table th.admin-col,
-#archive-table td.admin-col {
-  width: 0;
-  min-width: 0;
-  padding-left: 0;
-  padding-right: 0;
-  white-space: nowrap;
-}
+    hideBtn.addEventListener('click', () => {
+      textsHidden = !textsHidden;
+      const elements = [
+        ...document.querySelectorAll('.frame-info'),
+        document.getElementById('screenshot-btn'),
+        document.getElementById('info-btn'),
+        document.getElementById('info-panel'),
+      ];
+      elements.forEach(el => {
+        if (el) el.style.opacity = textsHidden ? '0' : '';
+      });
+      // Switch - to +
+      const svg = hideBtn.querySelector('svg');
+      if (textsHidden) {
+        svg.innerHTML = `<circle cx="12" cy="12" r="10"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="12" y1="7" x2="12" y2="17"/>`;
+      } else {
+        svg.innerHTML = `<circle cx="12" cy="12" r="10"/><line x1="7" y1="12" x2="17" y2="12"/>`;
+      }
+      // Also close info panel if open
+      if (textsHidden) document.getElementById('info-panel').classList.remove('open');
+    });
 
+    // ── Info panel ─────────────────────────────────────────────────────
+    const infoBtn   = document.getElementById('info-btn');
+    const infoPanel = document.getElementById('info-panel');
 
-#archive-table tbody tr {
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-}
+    infoBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      infoPanel.classList.toggle('open');
+    });
 
-#archive-table td {
-  padding: 6px 10px;
-  border-bottom: none;
-  vertical-align: top;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
+    // Close info panel when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!infoPanel.contains(e.target) && !infoBtn.contains(e.target)) {
+        infoPanel.classList.remove('open');
+      }
+    });
+  </script>
 
-#archive-table td:hover { opacity: 0.65; }
+  <script>
+    document.getElementById('screenshot-btn').addEventListener('click', async () => {
+      const btn   = document.getElementById('screenshot-btn');
+      const flash = document.getElementById('screenshot-flash');
 
-#archive-table td.thumb {
-  width: 48px;
-  cursor: pointer;
-}
-#archive-table td.thumb img {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  display: block;
-}
+      btn.style.visibility = 'hidden';
 
-/* ─── Filter bar ─────────────────────────────────────────── */
-#filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
+      // Show white flash immediately — don't wait for canvas
+      flash.style.cssText = 'position:fixed;inset:0;z-index:500;background:#fff;display:block;';
 
-.filter-badge {
-  font-size: var(--fs-info);
-  color: var(--white);
-  border: 1px solid rgba(255,255,255,0.4);
-  padding: 2px 10px;
-  border-radius: 100px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.filter-badge:hover { opacity: 0.7; }
+      try {
+        const dpr = window.devicePixelRatio || 1;
+        const vw  = window.innerWidth;
+        const vh  = window.innerHeight;
 
-/* ─── Admin controls ─────────────────────────────────────── */
-.admin-controls { margin-bottom: 16px; }
+        // Final canvas = exact viewport size
+        const canvas = document.createElement('canvas');
+        canvas.width  = vw * dpr;
+        canvas.height = vh * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
 
-.btn {
-  font-family: var(--font-main);
-  font-weight: 500;
-  font-size: var(--fs-info);
-  color: var(--white);
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.4);
-  padding: 4px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-.btn:hover { opacity: 0.65; }
-.btn + .btn { margin-left: 8px; }
+        // Black background
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, vw, vh);
 
-/* ─── Upload / Login overlay ─────────────────────────────── */
-#modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: rgba(0,0,0,0.85);
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-#modal-overlay.open { display: flex; }
+        // Draw each frame: replicate object-fit:cover + transform:scale/translate
+        const frames = document.querySelectorAll('.frame');
+        for (const frame of frames) {
+          const rect = frame.getBoundingClientRect();
+          const img  = frame.querySelector('img');
+          if (!img || !img.complete) continue;
 
-.modal {
-  width: min(480px, 90vw);
-  padding: 32px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(0,0,0,0.6);
-}
-.modal h2 {
-  font-size: var(--fs);
-  font-weight: 500;
-  margin-bottom: 24px;
-}
-.modal label {
-  display: block;
-  font-size: var(--fs-info);
-  margin-bottom: 4px;
-  opacity: 0.6;
-}
-.modal input,
-.modal select,
-.modal textarea {
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.3);
-  color: var(--white);
-  font-family: var(--font-main);
-  font-weight: 500;
-  font-size: var(--fs-info);
-  padding: 6px 0;
-  outline: none;
-  margin-bottom: 20px;
-  transition: border-color 0.2s;
-}
-.modal input:focus,
-.modal select:focus,
-.modal textarea:focus { border-color: rgba(255,255,255,0.8); }
-.modal select option { background: #111; }
-.modal textarea { resize: vertical; min-height: 60px; }
+          const iw = img.naturalWidth;
+          const ih = img.naturalHeight;
+          const fw = rect.width;
+          const fh = rect.height;
 
-.modal-error {
-  font-size: var(--fs-info);
-  color: rgba(255, 100, 100, 0.9);
-  margin-bottom: 12px;
-  min-height: 1.4em;
-}
+          // Parse transform from inline style: scale(z) translate(tx%, ty%)
+          const styleTransform = img.style.transform || '';
+          const scaleMatch     = styleTransform.match(/scale\(([\d.]+)\)/);
+          const translateMatch = styleTransform.match(/translate\(([-\d.]+)%,\s*([-\d.]+)%\)/);
+          const zoom = scaleMatch     ? parseFloat(scaleMatch[1])     : 1;
+          const tx   = translateMatch ? parseFloat(translateMatch[1]) : 0;
+          const ty   = translateMatch ? parseFloat(translateMatch[2]) : 0;
 
-/* ─── Upload image preview ───────────────────────────────── */
-#upload-preview-wrap {
-  border: 1px solid rgba(255,255,255,0.15);
-  margin-bottom: 20px;
-  display: none;
-}
-#upload-preview-wrap.has-image { display: block; }
-#upload-preview {
-  width: 100%;
-  max-height: 200px;
-  object-fit: contain;
-  display: block;
-}
+          // object-fit: cover
+          const coverScale = Math.max(fw / iw, fh / ih);
+          const dispW = iw * coverScale;
+          const dispH = ih * coverScale;
 
-/* ─── Utilities ──────────────────────────────────────────── */
-.hidden { display: none !important; }
-/* ─── Screenshot button ──────────────────────────────────── */
-#screenshot-btn {
-  position: fixed;
-  bottom: var(--pad);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  color: var(--white);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.6), 0 2px 16px rgba(0,0,0,0.5);
-  opacity: 1;
-  transition: opacity 0.15s;
-  line-height: 1;
-}
+          // Replicate CSS transform exactly using canvas transforms:
+          // transform-origin: center → translate to center, apply scale+translate, translate back
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(rect.left, rect.top, fw, fh);
+          ctx.clip();
 
-#screenshot-btn:hover { opacity: 1; }
+          // Move to frame center
+          ctx.translate(rect.left + fw / 2, rect.top + fh / 2);
+          // Apply scale
+          ctx.scale(zoom, zoom);
+          // Apply translate (% of frame size)
+          ctx.translate((tx / 100) * fw, (ty / 100) * fh);
+          // Draw image centered (cover already centers it)
+          ctx.drawImage(img, -dispW / 2, -dispH / 2, dispW, dispH);
+          ctx.restore();
 
-#screenshot-btn svg {
-  width: calc(var(--fs-info) * 2.3);
-  height: calc(var(--fs-info) * 2.3);
-  display: block;
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
-}
+          // Draw frame-info text — read exact positions from DOM
+          const info = frame.querySelector('.frame-info');
+          if (info) {
+            const ps = Array.from(info.querySelectorAll('p'));
+            if (ps.length > 0) {
+              const fsinfo = Math.min(Math.max(vw * 0.06, 24), 38) / 3;
+              ctx.save();
+              ctx.beginPath();
+              ctx.rect(rect.left, rect.top, fw, fh);
+              ctx.clip();
+              const isRightFrame = rect.left >= vw / 2;
+              ctx.font          = `normal ${fsinfo}px GeistDr0ne, sans-serif`;
+              ctx.fillStyle     = '#ffffff';
+              ctx.shadowColor   = 'rgba(0,0,0,0.4)';
+              ctx.shadowBlur    = 8;
+              ctx.shadowOffsetX = 0;
+              ctx.shadowOffsetY = 1;
+              ctx.textBaseline  = 'hanging';
+              ctx.textAlign     = isRightFrame ? 'right' : 'left';
+              for (const p of ps) {
+                const pr = p.getBoundingClientRect();
+                const x  = isRightFrame ? pr.right : pr.left;
+                ctx.fillText(p.textContent.trim(), x, pr.top);
+              }
+              ctx.restore();
+            }
+          }
+        }
 
-/* Screenshot flash overlay */
-#screenshot-flash {
-  position: fixed;
-  inset: 0;
-  z-index: 500;
-  display: none;
-  background: #000;
-}
+        // Draw DR0NE label
+        const dl    = document.getElementById('drone-label');
+        const dlR   = dl.getBoundingClientRect();
+        const fs = Math.min(Math.max(vw * 0.06, 24), 38);
+        ctx.save();
+        ctx.font         = `normal ${fs}px GeistDr0ne, sans-serif`;
+        ctx.fillStyle    = '#ffffff';
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'hanging';
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 1;
+        ctx.shadowColor  = 'rgba(0,0,0,0.6)';
+        ctx.shadowBlur   = 4;
+        ctx.fillText('DR0NE', dlR.left, dlR.top);
+        // Second pass for the wider shadow layer
+        ctx.shadowOffsetY = 2;
+        ctx.shadowColor  = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur   = 16;
+        ctx.fillText('DR0NE', dlR.left, dlR.top);
+        ctx.restore();
 
-#screenshot-flash img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
+        // Watermark
+        ctx.save();
+        const wmSize = Math.round(Math.min(Math.max(vw * 0.06, 24), 38) / 2);
+        ctx.font         = `500 ${wmSize}px GeistDr0ne, sans-serif`;
+        ctx.fillStyle    = 'rgba(255,255,255,0.11)';
+        ctx.textBaseline = 'middle';
+        const wmText    = 'https://dr0ne.world ';
+        const wmMetrics = ctx.measureText(wmText);
+        const tw        = wmMetrics.width;
+        const th        = wmSize * 2.5;
+        const cw        = vw;
+        const ch        = vh;
+        ctx.translate(cw / 2, ch / 2);
+        ctx.rotate(-35 * Math.PI / 180);
+        const diag = Math.sqrt(cw * cw + ch * ch);
+        const cols = Math.ceil(diag / tw) + 2;
+        const rows = Math.ceil(diag / th) + 2;
+        for (let row = -rows; row <= rows; row++) {
+          for (let col = -cols; col <= cols; col++) {
+            ctx.fillText(wmText, col * tw, row * th);
+          }
+        }
+        ctx.restore();
 
-/* ─── Top corner buttons (hide + info) ──────────────────── */
-#hide-btn,
-#info-btn {
-  position: fixed;
-  top: var(--pad);
-  z-index: 100;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  color: var(--white);
-  line-height: 1;
-  opacity: 0.85;
-  transition: opacity 0.15s;
-}
+        const dataUrl = canvas.toDataURL('image/png');
 
-#hide-btn:hover,
-#info-btn:hover { opacity: 1; }
+        // Insert screenshot behind the existing white overlay
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0;';
+        flash.insertBefore(img, flash.firstChild);
 
-#hide-btn { left: var(--pad); }
-#info-btn  { right: var(--pad); }
+        // White overlay on top that fades out
+        const whiteOverlay = document.createElement('div');
+        whiteOverlay.style.cssText = 'position:absolute;inset:0;background:#fff;transition:opacity 1.3s ease;z-index:1;';
+        flash.appendChild(whiteOverlay);
 
-#hide-btn svg,
-#info-btn svg {
-  width: calc(var(--fs-info) * 2.3);
-  height: calc(var(--fs-info) * 2.3);
-  display: block;
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
-}
+        // Trigger fade
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            whiteOverlay.style.opacity = '0';
+          });
+        });
 
-/* ─── Info panel ─────────────────────────────────────────── */
-#info-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 50vh;              /* max half screen height */
-  z-index: 99;
-  width: clamp(260px, 35vw, 480px);
-  padding: var(--pad);
-  padding-top: calc(var(--pad) * 2 + var(--fs-info) + 12px); /* below info btn */
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  transform: translateX(100%);
-  transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
-  pointer-events: none;
-}
+        // After white fades (1.3s): hold screenshot then fade out — total ~2s
+        setTimeout(() => {
+          flash.style.transition = 'opacity 0.4s ease';
+          flash.style.opacity = '0';
+          setTimeout(() => {
+            flash.style.display = 'none';
+            flash.style.opacity = '';
+            flash.style.transition = '';
+            flash.innerHTML = '';
+          }, 400);
+        }, 2000);
 
-#info-panel.open {
-  transform: translateX(0);
-  pointer-events: auto;
-}
+        // Trigger download
+        const a = document.createElement('a');
+        a.href     = dataUrl;
+        const now = new Date();
+        const pad2 = n => String(n).padStart(2, '0');
+        const datePart = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+        const timePart = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+        a.download = `DR0NE ${datePart} at ${timePart}.png`;
+        a.click();
 
-#info-panel p {
-  font-size: var(--fs-info);
-  font-family: var(--font-main);
-  font-weight: 500;
-  color: var(--white);
-  text-shadow: 0 1px 8px rgba(0,0,0,0.4);
-  line-height: 1.5;
-  word-break: normal;
-  overflow-wrap: break-word;
-  margin-bottom: 1.2em;
-}
-
-#info-panel p:last-child { margin-bottom: 0; }
-
-#info-panel a {
-  color: var(--white);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-#info-panel a:hover { opacity: 0.7; }
-
-/* ─── Mobile (portrait) button repositioning ────────────── */
-@media (orientation: portrait) {
-  /* Crosshair: left edge, vertically centered between the two images */
-  #screenshot-btn {
-    left: var(--pad);
-    right: auto;
-    top: 50%;
-    bottom: auto;
-    transform: translateY(-50%);
-  }
-
-  /* Hide button: bottom right corner */
-  #hide-btn {
-    left: auto;
-    right: var(--pad);
-    top: auto;
-    bottom: var(--pad);
-  }
-
-  /* Info button: top right corner (already there, no change needed) */
-}
+      } finally {
+        btn.style.visibility = '';
+      }
+    });
+  </script>
+</body>
+</html>
