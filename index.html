@@ -37,7 +37,8 @@
 
   <!-- ── Info panel ─────────────────────────────────────────────────────── -->
   <div id="info-panel">
-    <p>Dr0ne is a practice formed by Kian Matine and Philipp Burwinkel in 2025, working across architecture, Kunst am Bau and set design. The work draws from a self-built universe of references across subcultures — driven by an interest in the sublime, violence, and absurdity. Active across Switzerland, with experience from offices in Zurich and Munich.</p>
+    <p>Dr0ne is a practice formed by Kian Matine and Philipp Burwinkel in 2025, working across architecture, Kunst am Bau and set design. The work draws from a self-built universe of references across subcultures — driven by an interest in the sublime, violence, and absurdity.</p>
+    <p>Active across Switzerland, with experience from offices in Zurich and Munich.</p>
     <p>Rendering and Visualization:<br>Gate Visual Studio<br><a href="https://gatevisuals.xyz" target="_blank" rel="noopener">gatevisuals.xyz</a></p>
   </div>
 
@@ -367,7 +368,7 @@
         ctx.save();
         const wmSize = Math.round(Math.min(Math.max(vw * 0.06, 24), 38) / 2);
         ctx.font         = `500 ${wmSize}px GeistDr0ne, sans-serif`;
-        ctx.fillStyle    = 'rgba(255,255,255,0.07)';
+        ctx.fillStyle    = 'rgba(255,255,255,0.11)';
         ctx.textBaseline = 'middle';
         const wmText    = 'https://dr0ne.world ';
         const wmMetrics = ctx.measureText(wmText);
@@ -387,37 +388,44 @@
         }
         ctx.restore();
 
-        // Flash sequence: white → fade to screenshot → hold → disappear
         const dataUrl = canvas.toDataURL('image/png');
 
-        // White flash
-        flash.style.cssText = 'position:fixed;inset:0;z-index:500;background:#fff;display:block;transition:none;';
-        document.body.appendChild(flash);
+        // Show screenshot underneath
+        flash.innerHTML = `<img src="${dataUrl}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;"/>`;
 
-        // After 0.5s white: show screenshot and fade in
+        // White overlay on top that fades out
+        const whiteOverlay = document.createElement('div');
+        whiteOverlay.style.cssText = 'position:absolute;inset:0;background:#fff;transition:opacity 0.5s ease;z-index:1;';
+        flash.appendChild(whiteOverlay);
+        flash.style.display = 'block';
+
+        // Trigger fade
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            whiteOverlay.style.opacity = '0';
+          });
+        });
+
+        // After white fades: hold screenshot 0.8s then fade out
         setTimeout(() => {
-          flash.innerHTML = `<img src="${dataUrl}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;"/>`;
-          flash.style.transition = 'background 0.5s ease';
-          flash.style.background = 'transparent';
-
-          // After 0.8s visible: fade out
+          flash.style.transition = 'opacity 0.4s ease';
+          flash.style.opacity = '0';
           setTimeout(() => {
-            flash.style.transition = 'opacity 0.4s ease';
-            flash.style.opacity = '0';
-            setTimeout(() => {
-              flash.style.display = 'none';
-              flash.style.opacity = '';
-              flash.style.transition = '';
-              flash.style.background = '';
-              flash.innerHTML = '';
-            }, 400);
-          }, 800);
-        }, 500);
+            flash.style.display = 'none';
+            flash.style.opacity = '';
+            flash.style.transition = '';
+            flash.innerHTML = '';
+          }, 400);
+        }, 1400);
 
         // Trigger download
         const a = document.createElement('a');
         a.href     = dataUrl;
-        a.download = `dr0ne-${Date.now()}.png`;
+        const now = new Date();
+        const pad2 = n => String(n).padStart(2, '0');
+        const datePart = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
+        const timePart = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+        a.download = `DR0NE ${datePart} at ${timePart}.png`;
         a.click();
 
       } finally {
