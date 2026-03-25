@@ -226,21 +226,21 @@
           const tx   = translateMatch ? parseFloat(translateMatch[1]) : 0;
           const ty   = translateMatch ? parseFloat(translateMatch[2]) : 0;
 
-          // object-fit: cover scale
+          // object-fit: cover: scale image to fill frame
           const coverScale = Math.max(fw / iw, fh / ih);
           const dispW = iw * coverScale;
           const dispH = ih * coverScale;
-
-          // CSS transform: scale(zoom) translate(tx%, ty%) with transform-origin: center
-          // Order: first translate (% of frame size), then scale around center
-          // translate percentages are relative to the img element = fw x fh
           const zoomedW = dispW * zoom;
           const zoomedH = dispH * zoom;
 
-          // Final image top-left position:
-          // frame_center + translate_offset * zoom - zoomedSize/2
-          const ox = rect.left + fw / 2 + (tx / 100) * fw * zoom - zoomedW / 2;
-          const oy = rect.top  + fh / 2 + (ty / 100) * fh * zoom - zoomedH / 2;
+          // CSS transform: scale(zoom) translate(tx%, ty%) with transform-origin: center
+          // Applied to img element which fills the frame exactly (fw x fh).
+          // Any point at element-coords (px, py) maps to screen:
+          //   screen = rect.topleft + fw/2 + zoom*(px - fw/2 + tx%*fw)  [x]
+          //   screen = rect.topleft + fh/2 + zoom*(py - fh/2 + ty%*fh)  [y]
+          // Cover image top-left in element-coords: ((fw-dispW)/2, (fh-dispH)/2)
+          const ox = rect.left + fw / 2 + zoom * ((fw - dispW) / 2 - fw / 2 + (tx / 100) * fw);
+          const oy = rect.top  + fh / 2 + zoom * ((fh - dispH) / 2 - fh / 2 + (ty / 100) * fh);
 
           // Clip to frame rect
           ctx.save();
