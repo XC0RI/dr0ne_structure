@@ -169,13 +169,15 @@ html, body {
 #archive-table col.col-txt      { width: 26%; }
 #archive-table col.col-admin    { width: 0; }
 
-/* ── Progressive hiding + redistribution ────────────────── */
+/* ── Progressive hiding + redistribution ─────────────────────
+   Breakpoints derived from content min-widths and col percentages.
+   Each step also resets hidden col to width:0 and prevents bleed.
+   ─────────────────────────────────────────────────────────────── */
 
-/* hide txt ≤ 900px */
+/* Stage 1: hide txt ≤ 900px  (location at 9% would hit 80px at ~901px) */
 @media (max-width: 900px) {
   #archive-table col.col-txt      { width: 0; }
-  #archive-table td.txt,
-  #archive-table th.txt           { display: none; }
+  #archive-table td.txt, #archive-table th.txt { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
   #archive-table col.col-position { width: 7%; }
   #archive-table col.col-date     { width: 8%; }
   #archive-table col.col-made-by  { width: 12%; }
@@ -186,14 +188,12 @@ html, body {
   #archive-table col.col-location { width: 12%; }
 }
 
-/* hide location ≤ 780px */
-@media (max-width: 780px) {
+/* Stage 2: hide location ≤ 720px  (location at 12% hits 80px at ~710px) */
+@media (max-width: 720px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
-  #archive-table td.txt,
-  #archive-table th.txt           { display: none; }
-  #archive-table td.location,
-  #archive-table th.location      { display: none; }
+  #archive-table td.txt,      #archive-table th.txt      { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
+  #archive-table td.location, #archive-table th.location { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
   #archive-table col.col-position { width: 8%; }
   #archive-table col.col-date     { width: 9%; }
   #archive-table col.col-made-by  { width: 14%; }
@@ -203,17 +203,14 @@ html, body {
   #archive-table col.col-title    { width: 34%; }
 }
 
-/* hide 1st ≤ 680px */
-@media (max-width: 680px) {
+/* Stage 3: hide 1st ≤ 620px  (type at 12% hits 70px at ~621px) */
+@media (max-width: 620px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-first    { width: 0; }
-  #archive-table td.txt,
-  #archive-table th.txt           { display: none; }
-  #archive-table td.location,
-  #archive-table th.location      { display: none; }
-  #archive-table td.first_pub,
-  #archive-table th.first_pub     { display: none; }
+  #archive-table td.txt,       #archive-table th.txt       { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
+  #archive-table td.location,  #archive-table th.location  { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
+  #archive-table td.first_pub, #archive-table th.first_pub { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
   #archive-table col.col-position { width: 8%; }
   #archive-table col.col-date     { width: 10%; }
   #archive-table col.col-made-by  { width: 15%; }
@@ -222,20 +219,16 @@ html, body {
   #archive-table col.col-title    { width: 36%; }
 }
 
-/* hide type ≤ 580px */
-@media (max-width: 580px) {
+/* Stage 4: hide type ≤ 520px  (type at 13% hits 70px at ~573px) */
+@media (max-width: 520px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-first    { width: 0; }
   #archive-table col.col-type     { width: 0; }
-  #archive-table td.txt,
-  #archive-table th.txt           { display: none; }
-  #archive-table td.location,
-  #archive-table th.location      { display: none; }
-  #archive-table td.first_pub,
-  #archive-table th.first_pub     { display: none; }
-  #archive-table td.type,
-  #archive-table th.type          { display: none; }
+  #archive-table td.txt,       #archive-table th.txt       { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
+  #archive-table td.location,  #archive-table th.location  { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
+  #archive-table td.first_pub, #archive-table th.first_pub { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
+  #archive-table td.type,      #archive-table th.type      { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
   #archive-table col.col-position { width: 9%; }
   #archive-table col.col-date     { width: 11%; }
   #archive-table col.col-made-by  { width: 17%; }
@@ -243,23 +236,18 @@ html, body {
   #archive-table col.col-title    { width: 42%; }
 }
 
-/* hide date ≤ 480px */
-@media (max-width: 480px) {
+/* Stage 5: hide date ≤ 430px  (made_by at 17% hits 68px at ~433px) */
+@media (max-width: 430px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-first    { width: 0; }
   #archive-table col.col-type     { width: 0; }
   #archive-table col.col-date     { width: 0; }
-  #archive-table td.txt,
-  #archive-table th.txt           { display: none; }
-  #archive-table td.location,
-  #archive-table th.location      { display: none; }
-  #archive-table td.first_pub,
-  #archive-table th.first_pub     { display: none; }
-  #archive-table td.type,
-  #archive-table th.type          { display: none; }
-  #archive-table td.date,
-  #archive-table th.date          { display: none; }
+  #archive-table td.txt,       #archive-table th.txt       { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
+  #archive-table td.location,  #archive-table th.location  { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
+  #archive-table td.first_pub, #archive-table th.first_pub { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
+  #archive-table td.type,      #archive-table th.type      { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
+  #archive-table td.date,      #archive-table th.date      { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
   #archive-table col.col-position { width: 11%; }
   #archive-table col.col-made-by  { width: 19%; }
   #archive-table col.col-made-by2 { width: 23%; }
