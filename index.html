@@ -131,18 +131,25 @@
     droneLabel.addEventListener('click', () => {
       const isOpen = archiveOverlay.classList.contains('open');
       const screenshotBtn = document.getElementById('screenshot-btn');
+      const hideBtn2       = document.getElementById('hide-btn');
+      const infoBtn2       = document.getElementById('info-btn');
       if (isOpen) {
         closeArchive();
         unblurCollage();
         setArchiveOpen(false);
         droneLabel.setAttribute('aria-label', 'Open archive');
         screenshotBtn.style.display = '';
+        hideBtn2.style.display = '';
+        infoBtn2.style.display = '';
       } else {
         openArchive(images);
         blurCollage();
         setArchiveOpen(true);
         droneLabel.setAttribute('aria-label', 'Close archive');
         screenshotBtn.style.display = 'none';
+        hideBtn2.style.display = 'none';
+        infoBtn2.style.display = 'none';
+        document.getElementById('info-panel').classList.remove('open');
       }
     });
 
@@ -160,6 +167,8 @@
         unblurCollage();
         setArchiveOpen(false);
         document.getElementById('screenshot-btn').style.display = '';
+        document.getElementById('hide-btn').style.display = '';
+        document.getElementById('info-btn').style.display = '';
       }
     });
 
