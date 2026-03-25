@@ -256,6 +256,9 @@
 
       btn.style.visibility = 'hidden';
 
+      // Show white flash immediately — don't wait for canvas
+      flash.style.cssText = 'position:fixed;inset:0;z-index:500;background:#fff;display:block;';
+
       try {
         const dpr = window.devicePixelRatio || 1;
         const vw  = window.innerWidth;
@@ -390,14 +393,16 @@
 
         const dataUrl = canvas.toDataURL('image/png');
 
-        // Show screenshot underneath
-        flash.innerHTML = `<img src="${dataUrl}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;"/>`;
+        // Insert screenshot behind the existing white overlay
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0;';
+        flash.insertBefore(img, flash.firstChild);
 
         // White overlay on top that fades out
         const whiteOverlay = document.createElement('div');
-        whiteOverlay.style.cssText = 'position:absolute;inset:0;background:#fff;transition:opacity 0.5s ease;z-index:1;';
+        whiteOverlay.style.cssText = 'position:absolute;inset:0;background:#fff;transition:opacity 1.3s ease;z-index:1;';
         flash.appendChild(whiteOverlay);
-        flash.style.display = 'block';
 
         // Trigger fade
         requestAnimationFrame(() => {
@@ -406,7 +411,7 @@
           });
         });
 
-        // After white fades: hold screenshot 0.8s then fade out
+        // After white fades (1.3s): hold screenshot then fade out — total ~2s
         setTimeout(() => {
           flash.style.transition = 'opacity 0.4s ease';
           flash.style.opacity = '0';
@@ -416,7 +421,7 @@
             flash.style.transition = '';
             flash.innerHTML = '';
           }, 400);
-        }, 1400);
+        }, 2000);
 
         // Trigger download
         const a = document.createElement('a');
