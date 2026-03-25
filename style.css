@@ -8,7 +8,7 @@
   font-display: block;
 }
 
-/* ─── Variabless ─────────────────────────────────────────── */
+/* ─── Variables ─────────────────────────────────────────── */
 :root {
   --fs:      clamp(24px, 6vw, 38px);
   --fs-info: calc(var(--fs) / 3);
@@ -216,52 +216,57 @@ html, body {
 
 /* ── Responsive: progressive column hiding ───────────────── */
 
-/* Step 1 — hide txt (below ~900px) */
-@media (max-width: 900px) {
+/* Step 1 — hide txt (below ~1100px) */
+@media (max-width: 1100px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table td.txt,
   #archive-table th.txt           { display: none; }
 }
 
-/* Step 2 — hide location (below ~720px) */
-@media (max-width: 720px) {
+/* Step 2 — hide location (below ~900px) */
+@media (max-width: 900px) {
   #archive-table col.col-location { width: 0; }
   #archive-table td.location,
   #archive-table th.location      { display: none; }
 }
 
-/* Step 3 — hide 1st (below ~600px) */
-@media (max-width: 600px) {
+/* Step 3 — hide 1st (below ~750px) */
+@media (max-width: 750px) {
   #archive-table col.col-first    { width: 0; }
   #archive-table td.first_pub,
   #archive-table th.first_pub     { display: none; }
 }
 
-/* Step 4 — hide type (below ~500px) */
-@media (max-width: 500px) {
+/* Step 4 — hide type (below ~600px) */
+@media (max-width: 600px) {
   #archive-table col.col-type     { width: 0; }
   #archive-table td.type,
   #archive-table th.type          { display: none; }
 }
 
-/* Step 5 — hide date (below ~400px) */
-@media (max-width: 400px) {
+/* Step 5 — hide date (below ~500px) */
+@media (max-width: 500px) {
   #archive-table col.col-date     { width: 0; }
   #archive-table td.date,
   #archive-table th.date          { display: none; }
 }
 
-/* Narrow screens: give position a fixed min-width, made_by more room */
-@media (max-width: 600px) {
+/* ── Narrow screens: fixed px for critical columns ───────── */
+@media (max-width: 750px) {
   #archive-table col.col-thumb    { width: 44px; }
-  #archive-table col.col-position { width: 36px; }
-  #archive-table col.col-made-by  { width: 22%; }
-  #archive-table col.col-made-by2 { width: 18%; }
+  #archive-table col.col-position { width: 40px; }
+  #archive-table col.col-date     { width: 44px; }
+  #archive-table col.col-made-by  { width: 70px; }
+  #archive-table col.col-made-by2 { width: 22%; }
   #archive-table col.col-title    { width: auto; }
+}
 
-  #archive-table td.position {
-    min-width: 36px;
-  }
+@media (max-width: 500px) {
+  #archive-table col.col-thumb    { width: 44px; }
+  #archive-table col.col-position { width: 40px; }
+  #archive-table col.col-made-by  { width: 70px; }
+  #archive-table col.col-made-by2 { width: 28%; }
+  #archive-table col.col-title    { width: auto; }
 }
 
 #archive-table thead tr {
