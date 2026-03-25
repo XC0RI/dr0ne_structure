@@ -369,7 +369,7 @@ html, body {
   padding: 0;
   color: var(--white);
   text-shadow: 0 1px 4px rgba(0,0,0,0.6), 0 2px 16px rgba(0,0,0,0.5);
-  opacity: 0.85;
+  opacity: 1;
   transition: opacity 0.15s;
   line-height: 1;
 }
@@ -377,8 +377,8 @@ html, body {
 #screenshot-btn:hover { opacity: 1; }
 
 #screenshot-btn svg {
-  width: var(--fs-info);
-  height: var(--fs-info);
+  width: calc(var(--fs-info) * 2);
+  height: calc(var(--fs-info) * 2);
   display: block;
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
 }
