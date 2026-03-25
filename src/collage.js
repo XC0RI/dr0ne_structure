@@ -7,6 +7,7 @@ let allImages    = [];      // full image list from D1
 let collageIndex = 0;       // how many collages have been shown
 let busy         = false;   // prevents scroll spamming
 let archiveOpen  = false;   // blocks collage scroll when archive is visible
+let wheelAccum   = 0;       // tracks accumulated wheel delta between advances
 
 export function setArchiveOpen(val) { archiveOpen = val; }
 
@@ -142,6 +143,8 @@ function preloadCollage(idx) {
 function advanceCollage() {
   if (busy || allImages.length === 0 || archiveOpen) return;
   busy = true;
+  // Reset wheel accumulator immediately so no queued events slip through
+  wheelAccum = 0;
 
   const current = stack.querySelector(`[data-col-idx="${collageIndex}"]`);
 
@@ -185,10 +188,18 @@ function attachScrollListeners() {
   ].join(';');
   document.body.appendChild(catcher);
 
-  // Wheel
+  // Wheel — accumulate to prevent multiple advances per gesture
+  let wheelTimer = null;
   catcher.addEventListener('wheel', (e) => {
     if (archiveOpen) return;
-    if (e.deltaY > 3) advanceCollage();
+    if (e.deltaY <= 0) { wheelAccum = 0; return; }
+    clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(() => { wheelAccum = 0; }, 150);
+    wheelAccum += e.deltaY;
+    if (wheelAccum > 30) {
+      wheelAccum = 0;
+      advanceCollage();
+    }
   }, { passive: true });
 
   // Touch swipe — override the window listeners below
