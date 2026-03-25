@@ -99,7 +99,7 @@ html, body {
   .frame:last-child  .frame-info { bottom: var(--pad); right: var(--pad); text-align: right; }
 }
 @media (orientation: portrait) {
-  .frame-info { left: var(--pad); top: 50%; transform: translateY(-50%); text-align: left; }
+  .frame-info { left: var(--pad); bottom: var(--pad); text-align: left; }
 }
 
 .frame-info p {
