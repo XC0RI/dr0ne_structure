@@ -106,16 +106,19 @@
 
     droneLabel.addEventListener('click', () => {
       const isOpen = archiveOverlay.classList.contains('open');
+      const screenshotBtn = document.getElementById('screenshot-btn');
       if (isOpen) {
         closeArchive();
         unblurCollage();
         setArchiveOpen(false);
         droneLabel.setAttribute('aria-label', 'Open archive');
+        screenshotBtn.style.display = '';
       } else {
         openArchive(images);
         blurCollage();
         setArchiveOpen(true);
         droneLabel.setAttribute('aria-label', 'Close archive');
+        screenshotBtn.style.display = 'none';
       }
     });
 
@@ -132,6 +135,7 @@
         closeArchive();
         unblurCollage();
         setArchiveOpen(false);
+        document.getElementById('screenshot-btn').style.display = '';
       }
     });
 
@@ -193,32 +197,46 @@
 
       try {
         // Capture the collage + DR0NE (both visible)
-        const canvas = await html2canvas(document.body, {
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#000000',
-          scale: window.devicePixelRatio || 1,
-          width:  window.innerWidth,
-          height: window.innerHeight,
-          x: 0,
-          y: 0,
-          scrollX: 0,
-          scrollY: 0,
-          windowWidth:  window.innerWidth,
-          windowHeight: window.innerHeight,
-          ignoreElements: (el) => {
-            const keep = ['collage-stack', 'drone-label'];
-            if (keep.includes(el.id)) return false;
-            if (el.id === 'screenshot-flash') return true;
-            if (el.id === 'screenshot-btn')   return true;
-            if (el.id === 'archive-overlay')  return true;
-            if (el.id === 'modal-overlay')    return true;
-            if (el.id === 'login-overlay')    return true;
-            if (el.id === 'admin-bar')        return true;
-            if (el.id === 'filter-bar')       return true;
-            return false;
-          }
+        // Render each frame individually and composite onto a final canvas
+        const dpr    = window.devicePixelRatio || 1;
+        const vw     = window.innerWidth;
+        const vh     = window.innerHeight;
+
+        const frames = document.querySelectorAll('.frame');
+        const final  = document.createElement('canvas');
+        final.width  = vw * dpr;
+        final.height = vh * dpr;
+        const fctx   = final.getContext('2d');
+        fctx.scale(dpr, dpr);
+        fctx.fillStyle = '#000';
+        fctx.fillRect(0, 0, vw, vh);
+
+        for (const frame of frames) {
+          const rect = frame.getBoundingClientRect();
+          const fc = await html2canvas(frame, {
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: null,
+            scale: dpr,
+            width:  Math.round(rect.width),
+            height: Math.round(rect.height),
+            windowWidth:  vw,
+            windowHeight: vh,
+          });
+          fctx.drawImage(fc, rect.left, rect.top, rect.width, rect.height);
+        }
+
+        // Draw DR0NE label
+        const dl   = document.getElementById('drone-label');
+        const dlR  = dl.getBoundingClientRect();
+        const dlC  = await html2canvas(dl, {
+          useCORS: true, backgroundColor: null, scale: dpr,
+          width: Math.round(dlR.width), height: Math.round(dlR.height),
+          windowWidth: vw, windowHeight: vh,
         });
+        fctx.drawImage(dlC, dlR.left, dlR.top, dlR.width, dlR.height);
+
+        const canvas = final;
 
         // Draw watermark diagonally
         const ctx = canvas.getContext('2d');
