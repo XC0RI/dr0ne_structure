@@ -198,8 +198,15 @@
           allowTaint: true,
           backgroundColor: '#000000',
           scale: window.devicePixelRatio || 1,
+          width:  window.innerWidth,
+          height: window.innerHeight,
+          x: 0,
+          y: 0,
+          scrollX: 0,
+          scrollY: 0,
+          windowWidth:  window.innerWidth,
+          windowHeight: window.innerHeight,
           ignoreElements: (el) => {
-            // Exclude everything except collage and drone-label
             const keep = ['collage-stack', 'drone-label'];
             if (keep.includes(el.id)) return false;
             if (el.id === 'screenshot-flash') return true;
