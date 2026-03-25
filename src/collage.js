@@ -176,12 +176,24 @@ function advanceCollage() {
 let touchStartY = 0;
 
 function attachScrollListeners() {
-  // One wheel event → one collage, then blocked until animation completes
-  // Listen on document to ensure Mac trackpad events are captured immediately
-  document.addEventListener('wheel', (e) => {
+  const wheelHandler = (e) => {
     if (archiveOpen) return;
-    if (e.deltaY > 3) advanceCollage();  // small threshold filters micro-movements
-  }, { passive: true });
+    if (e.deltaY > 3) advanceCollage();
+  };
+
+  // Safari on Mac requires a user interaction before wheel events fire reliably.
+  // Attach wheel listener immediately, but also re-attach after first click/touch
+  // to ensure Safari has activated the event pipeline.
+  document.addEventListener('wheel', wheelHandler, { passive: true });
+
+  const activate = () => {
+    document.removeEventListener('wheel', wheelHandler, { passive: true });
+    document.addEventListener('wheel', wheelHandler, { passive: true });
+    document.removeEventListener('click', activate);
+    document.removeEventListener('touchstart', activate);
+  };
+  document.addEventListener('click', activate, { once: true });
+  document.addEventListener('touchstart', activate, { once: true, passive: true });
 
   // Touch swipe up
   window.addEventListener('touchstart', (e) => {
