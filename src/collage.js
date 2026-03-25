@@ -168,7 +168,7 @@ function advanceCollage() {
   // Preload further ahead
   for (let i = 1; i <= PRELOAD_COUNT; i++) preloadCollage(collageIndex + i);
 
-  setTimeout(() => { busy = false; }, 650);
+  setTimeout(() => { busy = false; }, 800);
 }
 
 // ─── Scroll detection ────────────────────────────────────────────────────────
@@ -176,8 +176,9 @@ function advanceCollage() {
 let touchStartY = 0;
 
 function attachScrollListeners() {
-  // Mouse wheel
+  // One wheel event → one collage, then blocked until animation completes
   window.addEventListener('wheel', (e) => {
+    if (archiveOpen) return;
     if (e.deltaY > 0) advanceCollage();
   }, { passive: true });
 
@@ -188,7 +189,7 @@ function attachScrollListeners() {
 
   window.addEventListener('touchend', (e) => {
     const delta = touchStartY - e.changedTouches[0].clientY;
-    if (delta > 40) advanceCollage();
+    if (delta > 60) advanceCollage();
   }, { passive: true });
 
   // Keyboard arrow down / space (blocked when archive is open)
