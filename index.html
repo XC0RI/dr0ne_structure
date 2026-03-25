@@ -258,17 +258,19 @@
               ctx.beginPath();
               ctx.rect(rect.left, rect.top, fw, fh);
               ctx.clip();
-              ctx.font         = `normal ${fsinfo}px GeistDr0ne, sans-serif`;
-              ctx.fillStyle    = '#ffffff';
-              ctx.shadowColor  = 'rgba(0,0,0,0.4)';
-              ctx.shadowBlur   = 8;
+              const isRightFrame = rect.left >= vw / 2;
+              ctx.font          = `normal ${fsinfo}px GeistDr0ne, sans-serif`;
+              ctx.fillStyle     = '#ffffff';
+              ctx.shadowColor   = 'rgba(0,0,0,0.4)';
+              ctx.shadowBlur    = 8;
               ctx.shadowOffsetX = 0;
               ctx.shadowOffsetY = 1;
-              ctx.textBaseline = 'hanging';
-              ctx.textAlign    = 'left';
+              ctx.textBaseline  = 'hanging';
+              ctx.textAlign     = isRightFrame ? 'right' : 'left';
               for (const p of ps) {
                 const pr = p.getBoundingClientRect();
-                ctx.fillText(p.textContent.trim(), pr.left, pr.top);
+                const x  = isRightFrame ? pr.right : pr.left;
+                ctx.fillText(p.textContent.trim(), x, pr.top);
               }
               ctx.restore();
             }
