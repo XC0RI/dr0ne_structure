@@ -379,8 +379,8 @@ html, body {
 #screenshot-btn:hover { opacity: 1; }
 
 #screenshot-btn svg {
-  width: calc(var(--fs-info) * 3);
-  height: calc(var(--fs-info) * 3);
+  width: calc(var(--fs-info) * 2.3);
+  height: calc(var(--fs-info) * 2.3);
   display: block;
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
 }
@@ -425,8 +425,8 @@ html, body {
 
 #hide-btn svg,
 #info-btn svg {
-  width: calc(var(--fs-info) * 3);
-  height: calc(var(--fs-info) * 3);
+  width: calc(var(--fs-info) * 2.3);
+  height: calc(var(--fs-info) * 2.3);
   display: block;
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
 }
