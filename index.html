@@ -18,6 +18,29 @@
     DR0NE
   </div>
 
+  <!-- ── Top-left hide button ─────────────────────────────────────────── -->
+  <button id="hide-btn" aria-label="Hide texts">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="7" y1="12" x2="17" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- ── Top-right info button ─────────────────────────────────────────── -->
+  <button id="info-btn" aria-label="Info">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="10" x2="12" y2="16"/>
+      <circle cx="12" cy="7.5" r="0.5" fill="currentColor" stroke="none"/>
+    </svg>
+  </button>
+
+  <!-- ── Info panel ─────────────────────────────────────────────────────── -->
+  <div id="info-panel">
+    <p>Dr0ne is a practice formed by Kian Matine and Philipp Burwinkel in 2025, working across architecture, Kunst am Bau and set design. The work draws from a self-built universe of references across subcultures — driven by an interest in the sublime, violence, and absurdity. Active across Switzerland, with experience from offices in Zurich and Munich.</p>
+    <p>Rendering and Visualization:<br>Gate Visual Studio<br><a href="https://gatevisuals.xyz" target="_blank" rel="noopener">gatevisuals.xyz</a></p>
+  </div>
+
   <!-- ── Screenshot button ───────────────────────────────────────────── -->
   <button id="screenshot-btn" aria-label="Screenshot">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
@@ -181,6 +204,47 @@
     });
 
     document.getElementById('login-cancel').addEventListener('click', hideLoginModal);
+
+    // ── Hide/show texts ────────────────────────────────────────────────
+    const hideBtn = document.getElementById('hide-btn');
+    let textsHidden = false;
+
+    hideBtn.addEventListener('click', () => {
+      textsHidden = !textsHidden;
+      const elements = [
+        ...document.querySelectorAll('.frame-info'),
+        document.getElementById('screenshot-btn'),
+        document.getElementById('info-btn'),
+        document.getElementById('info-panel'),
+      ];
+      elements.forEach(el => {
+        if (el) el.style.opacity = textsHidden ? '0' : '';
+      });
+      // Switch - to +
+      const svg = hideBtn.querySelector('svg');
+      if (textsHidden) {
+        svg.innerHTML = `<circle cx="12" cy="12" r="10"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="12" y1="7" x2="12" y2="17"/>`;
+      } else {
+        svg.innerHTML = `<circle cx="12" cy="12" r="10"/><line x1="7" y1="12" x2="17" y2="12"/>`;
+      }
+      // Also close info panel if open
+      if (textsHidden) document.getElementById('info-panel').classList.remove('open');
+    });
+
+    // ── Info panel ─────────────────────────────────────────────────────
+    const infoBtn   = document.getElementById('info-btn');
+    const infoPanel = document.getElementById('info-panel');
+
+    infoBtn.addEventListener('click', () => {
+      infoPanel.classList.toggle('open');
+    });
+
+    // Close info panel when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!infoPanel.contains(e.target) && e.target !== infoBtn) {
+        infoPanel.classList.remove('open');
+      }
+    });
   </script>
 
   <script>
