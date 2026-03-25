@@ -231,17 +231,16 @@
           const dispW = iw * coverScale;
           const dispH = ih * coverScale;
 
-          // Center offset for cover
-          let ox = (fw - dispW) / 2;
-          let oy = (fh - dispH) / 2;
-
-          // Apply zoom and translate (translate is % of displayed size * zoom)
+          // CSS transform: scale(zoom) translate(tx%, ty%) with transform-origin: center
+          // Order: first translate (% of frame size), then scale around center
+          // translate percentages are relative to the img element = fw x fh
           const zoomedW = dispW * zoom;
           const zoomedH = dispH * zoom;
-          ox += (fw - zoomedW) / 2;
-          oy += (fh - zoomedH) / 2;
-          ox += (tx / 100) * zoomedW;
-          oy += (ty / 100) * zoomedH;
+
+          // Final image top-left position:
+          // frame_center + translate_offset * zoom - zoomedSize/2
+          const ox = rect.left + fw / 2 + (tx / 100) * fw * zoom - zoomedW / 2;
+          const oy = rect.top  + fh / 2 + (ty / 100) * fh * zoom - zoomedH / 2;
 
           // Clip to frame rect
           ctx.save();
