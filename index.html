@@ -226,16 +226,17 @@
         ctx.fillStyle    = 'rgba(255,255,255,0.13)';
         ctx.textBaseline = 'middle';
 
-        const text    = 'https://dr0ne.world';
+        const text    = 'https://dr0ne.world ';
         const metrics = ctx.measureText(text);
-        const tw      = metrics.width + fontSize * 4;  // spacing between repeats
-        const th      = fontSize * 3.5;
+        const tw      = metrics.width;          // no extra gap — text repeats flush
+        const th      = fontSize * 2.5;
 
         ctx.translate(w / 2, h / 2);
         ctx.rotate(-35 * Math.PI / 180);
 
-        const cols = Math.ceil(Math.sqrt(w * w + h * h) / tw) + 2;
-        const rows = Math.ceil(Math.sqrt(w * w + h * h) / th) + 2;
+        const diag = Math.sqrt(w * w + h * h);
+        const cols = Math.ceil(diag / tw) + 2;
+        const rows = Math.ceil(diag / th) + 2;
 
         for (let row = -rows; row <= rows; row++) {
           for (let col = -cols; col <= cols; col++) {
