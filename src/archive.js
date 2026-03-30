@@ -77,9 +77,15 @@ function filteredImages() {
   }
   if (alphaSort) {
     list = [...list].sort((a, b) => {
-      const av = getCellValue(a, alphaSort).toLowerCase();
-      const bv = getCellValue(b, alphaSort).toLowerCase();
-      return av.localeCompare(bv);
+      const av = getCellValue(a, alphaSort);
+      const bv = getCellValue(b, alphaSort);
+      // Exact "-" sorts to the end; all other values sort alphabetically
+      const aIsDash = av === '-';
+      const bIsDash = bv === '-';
+      if (aIsDash && bIsDash) return 0;  // both "-": keep chronological order
+      if (aIsDash) return 1;             // a is "-": goes after b
+      if (bIsDash) return -1;            // b is "-": goes after a
+      return av.toLowerCase().localeCompare(bv.toLowerCase());
     });
   }
   return list;
