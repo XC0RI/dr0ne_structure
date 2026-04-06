@@ -165,7 +165,7 @@ html, body {
 #archive-table col.col-made-by2 { width: 11%; }
 #archive-table col.col-type     { width: 8%; }
 #archive-table col.col-first    { width: 4%; }
-#archive-table col.col-title    { width: 22%; }
+#archive-table col.col-title    { width: auto; }
 #archive-table col.col-location { width: 9%; }
 #archive-table col.col-txt      { width: 26%; }
 #archive-table col.col-admin    { width: 0; }
@@ -175,8 +175,8 @@ html, body {
    Each step also resets hidden col to width:0 and prevents bleed.
    ─────────────────────────────────────────────────────────────── */
 
-/* Stage 1: hide txt ≤ 900px  (location at 9% would hit 80px at ~901px) */
-@media (max-width: 900px) {
+/* Stage 1: hide txt ≤ 1050px */
+@media (max-width: 1050px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table td.txt, #archive-table th.txt { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
   #archive-table col.col-position { width: 7%; }
@@ -185,12 +185,12 @@ html, body {
   #archive-table col.col-made-by2 { width: 15%; }
   #archive-table col.col-type     { width: 11%; }
   #archive-table col.col-first    { width: 5%; }
-  #archive-table col.col-title    { width: 30%; }
+  #archive-table col.col-title    { width: auto; }
   #archive-table col.col-location { width: 12%; }
 }
 
-/* Stage 2: hide location ≤ 700px */
-@media (max-width: 700px) {
+/* Stage 2: hide location ≤ 800px */
+@media (max-width: 800px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table td.txt,      #archive-table th.txt      { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
@@ -201,11 +201,11 @@ html, body {
   #archive-table col.col-made-by2 { width: 17%; }
   #archive-table col.col-type     { width: 12%; }
   #archive-table col.col-first    { width: 6%; }
-  #archive-table col.col-title    { width: 34%; }
+  #archive-table col.col-title    { width: auto; }
 }
 
-/* Stage 3: hide 1st ≤ 600px */
-@media (max-width: 600px) {
+/* Stage 3: hide 1st ≤ 650px */
+@media (max-width: 650px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-first    { width: 0; }
@@ -217,11 +217,11 @@ html, body {
   #archive-table col.col-made-by  { width: 15%; }
   #archive-table col.col-made-by2 { width: 18%; }
   #archive-table col.col-type     { width: 13%; }
-  #archive-table col.col-title    { width: 36%; }
+  #archive-table col.col-title    { width: auto; }
 }
 
-/* Stage 4: hide type ≤ 515px */
-@media (max-width: 515px) {
+/* Stage 4: hide type ≤ 550px */
+@media (max-width: 550px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-first    { width: 0; }
@@ -234,11 +234,11 @@ html, body {
   #archive-table col.col-date     { width: 11%; }
   #archive-table col.col-made-by  { width: 17%; }
   #archive-table col.col-made-by2 { width: 21%; }
-  #archive-table col.col-title    { width: 42%; }
+  #archive-table col.col-title    { width: auto; }
 }
 
-/* Stage 5: hide date ≤ 430px  (made_by at 17% hits 68px at ~433px) */
-@media (max-width: 430px) {
+/* Stage 5: hide date ≤ 450px */
+@media (max-width: 450px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-first    { width: 0; }
@@ -252,7 +252,7 @@ html, body {
   #archive-table col.col-position { width: 11%; }
   #archive-table col.col-made-by  { width: 19%; }
   #archive-table col.col-made-by2 { width: 23%; }
-  #archive-table col.col-title    { width: 47%; }
+  #archive-table col.col-title    { width: auto; }
 }
 
 /* Default: no wrap, clip overflow, no mid-word break */
@@ -263,6 +263,9 @@ html, body {
   text-overflow: ellipsis;
   word-break: normal;
 }
+
+/* title absorbs remaining space */
+#archive-table col.col-title { width: auto; }
 
 /* Wrap allowed in made_by2, title, txt — but never break mid-word */
 #archive-table td.made_by2,
