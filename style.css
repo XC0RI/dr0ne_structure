@@ -152,6 +152,7 @@ html, body {
 #archive-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
   font-size: var(--fs-info);
   color: var(--white);
 }
@@ -188,8 +189,8 @@ html, body {
   #archive-table col.col-location { width: 12%; }
 }
 
-/* Stage 2: hide location ≤ 720px  (location at 12% hits 80px at ~710px) */
-@media (max-width: 720px) {
+/* Stage 2: hide location ≤ 700px */
+@media (max-width: 700px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table td.txt,      #archive-table th.txt      { display: none; max-width: 0; padding-left: 0; padding-right: 0; overflow: hidden; }
@@ -203,8 +204,8 @@ html, body {
   #archive-table col.col-title    { width: 34%; }
 }
 
-/* Stage 3: hide 1st ≤ 620px  (type at 12% hits 70px at ~621px) */
-@media (max-width: 620px) {
+/* Stage 3: hide 1st ≤ 600px */
+@media (max-width: 600px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-first    { width: 0; }
@@ -219,8 +220,8 @@ html, body {
   #archive-table col.col-title    { width: 36%; }
 }
 
-/* Stage 4: hide type ≤ 520px  (type at 13% hits 70px at ~573px) */
-@media (max-width: 520px) {
+/* Stage 4: hide type ≤ 515px */
+@media (max-width: 515px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-first    { width: 0; }
