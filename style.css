@@ -165,17 +165,17 @@ html, body {
 #archive-table th.admin-col,
 #archive-table td.admin-col                     { padding: 0; overflow: hidden; max-width: 0; }
 
-#archive-table.admin-mode col.col-admin         { width: 44px; }
+#archive-table.admin-mode col.col-admin         { width: 44px !important; }
 #archive-table.admin-mode th.admin-col {
-  max-width: none;
-  overflow: visible;
-  padding: 6px 2px;
+  max-width: 44px !important;
+  overflow: visible !important;
+  padding: 6px 2px !important;
   text-align: center;
 }
 #archive-table.admin-mode td.admin-col {
-  max-width: none;
-  overflow: visible;
-  padding: 3px 2px;
+  max-width: 44px !important;
+  overflow: visible !important;
+  padding: 3px 2px !important;
   vertical-align: middle;
   text-align: center;
   white-space: nowrap;
