@@ -157,18 +157,25 @@ html, body {
   color: var(--white);
 }
 
-/* ── Thumb + Admin: fixed sizes ───────────────────────────── */
+/* ── Thumb: fixed size ─────────────────────────────────────── */
 #archive-table col.col-thumb { width: 52px; }
-#archive-table col.col-admin { width: 52px; }   /* fixed, always visible when logged in */
 
-#archive-table th.admin-col {
-  width: 52px;
-  padding: 6px 4px;
+/* ── Admin column: hidden by default, shown when logged in ─── */
+#archive-table col.col-admin                    { width: 0; }
+#archive-table th.admin-col,
+#archive-table td.admin-col                     { padding: 0; overflow: hidden; max-width: 0; }
+
+#archive-table.admin-mode col.col-admin         { width: 44px; }
+#archive-table.admin-mode th.admin-col {
+  max-width: none;
+  overflow: visible;
+  padding: 6px 2px;
   text-align: center;
 }
-#archive-table td.admin-col {
-  width: 52px;
-  padding: 4px;
+#archive-table.admin-mode td.admin-col {
+  max-width: none;
+  overflow: visible;
+  padding: 3px 2px;
   vertical-align: middle;
   text-align: center;
   white-space: nowrap;
@@ -184,12 +191,12 @@ html, body {
   opacity: 0.7;
   transition: opacity 0.15s;
   display: block;
-  margin: 2px auto;
+  margin: 1px auto;
 }
 .admin-icon-btn:hover { opacity: 1; }
 .admin-icon-btn svg {
-  width: calc(var(--fs-info) * 1.6);
-  height: calc(var(--fs-info) * 1.6);
+  width: calc(var(--fs-info) * 1.3);
+  height: calc(var(--fs-info) * 1.3);
   display: block;
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
 }
