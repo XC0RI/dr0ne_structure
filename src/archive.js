@@ -154,9 +154,14 @@ function renderTable() {
   const total   = visible.length;
   tableBody.innerHTML = '';
 
-  // Toggle admin-mode class so CSS shows/hides admin column
+  // Toggle admin-mode: set class AND directly update col width
   const table = document.getElementById('archive-table');
-  if (table) table.classList.toggle('admin-mode', isLoggedIn());
+  if (table) {
+    const loggedIn = isLoggedIn();
+    table.classList.toggle('admin-mode', loggedIn);
+    const adminCol = table.querySelector('col.col-admin');
+    if (adminCol) adminCol.style.width = loggedIn ? '44px' : '0';
+  }
 
   visible.forEach((img, posIdx) => {
     const tr = document.createElement('tr');
