@@ -203,15 +203,18 @@ function renderTable() {
       const adminTd = document.createElement('td');
       adminTd.className = 'admin-col';
 
+      // Edit button: = in circle
       const editBtn = document.createElement('button');
-      editBtn.className = 'btn';
-      editBtn.textContent = 'edit';
+      editBtn.className = 'admin-icon-btn';
+      editBtn.title = 'edit';
+      editBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="17" y2="14"/></svg>`;
       editBtn.addEventListener('click', (e) => { e.stopPropagation(); window.__openEditModal(img); });
 
+      // Delete button: × in circle
       const delBtn = document.createElement('button');
-      delBtn.className = 'btn';
-      delBtn.textContent = 'del';
-      delBtn.style.marginLeft = '6px';
+      delBtn.className = 'admin-icon-btn';
+      delBtn.title = 'delete';
+      delBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`;
       delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteImage(img.id); });
 
       adminTd.appendChild(editBtn);
