@@ -35,7 +35,7 @@ export async function onRequestPost(context) {
     made_by:   get('made_by'),
     made_by2:  get('made_by2'),
     type:      get('type'),
-    first_pub: formData.get('first_pub') === 'Cover' ? 'Cover' : '-',
+    first_pub: formData.get('first_pub') === '1st' ? '1st' : '-',
     title:     get('title'),
     location:  get('location'),
     txt:       get('txt'),
