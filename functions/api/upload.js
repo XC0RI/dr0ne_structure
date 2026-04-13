@@ -72,14 +72,4 @@ function json(data, status = 200) {
     status,
     headers: { 'Content-Type': 'application/json' }
   });
-}    try { await env.BUCKET.delete(r2Key); } catch {}
-    return json({ error: 'Upload failed' }, 500);
-  }
-}
-
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' }
-  });
 }
