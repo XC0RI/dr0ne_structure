@@ -55,7 +55,7 @@ const COLUMNS = [
   { key: 'made_by',   label: 'made by',   filterable: true,  sortable: true  },
   { key: 'made_by2',  label: 'made by2',  filterable: true,  sortable: true  },
   { key: 'type',      label: 'type',      filterable: true,  sortable: true  },
-  { key: 'first_pub', label: '1st',       filterable: true,  sortable: true  },
+  { key: 'first_pub', label: 'cover',     filterable: true,  sortable: true  },
   { key: 'title',     label: 'title',     filterable: true,  sortable: true  },
   { key: 'location',  label: 'location',  filterable: true,  sortable: true  },
   { key: 'txt',       label: 'txt',       filterable: true,  sortable: true  },
