@@ -55,7 +55,7 @@ const COLUMNS = [
   { key: 'made_by',   label: 'made by',   filterable: true,  sortable: true  },
   { key: 'made_by2',  label: 'made by2',  filterable: true,  sortable: true  },
   { key: 'type',      label: 'type',      filterable: true,  sortable: true  },
-  { key: 'first_pub', label: '1st',       filterable: true,  sortable: true  },
+  { key: 'cover_pub', label: 'cover',     filterable: true,  sortable: true  },
   { key: 'title',     label: 'title',     filterable: true,  sortable: true  },
   { key: 'location',  label: 'location',  filterable: true,  sortable: true  },
   { key: 'txt',       label: 'txt',       filterable: true,  sortable: true  },
@@ -64,7 +64,7 @@ const COLUMNS = [
 // ─── Data helpers ──────────────────────────────────────────────────────────────
 
 function getCellValue(img, key) {
-  if (key === 'first_pub') return img.first_pub ?? '-';
+  if (key === 'cover_pub') return img.cover_pub ?? '-';
   return img[key] ?? '-';
 }
 
@@ -105,7 +105,7 @@ export function renderTableHeader() {
 
   const colDefs = [
     'col-thumb', 'col-position', 'col-date', 'col-made-by', 'col-made-by2',
-    'col-type', 'col-first', 'col-title', 'col-location', 'col-txt', 'col-admin'
+    'col-type', 'col-cover', 'col-title', 'col-location', 'col-txt', 'col-admin'
   ];
   const colgroup = document.createElement('colgroup');
   colDefs.forEach(cls => {

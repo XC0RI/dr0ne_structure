@@ -1,7 +1,7 @@
 // functions/api/upload.js
 // POST /api/upload  (multipart/form-data)
 // Fields: image (File — any format, converted to WebP client-side before sending),
-//         date, made_by, made_by2, type, first_pub, title, location, txt
+//         date, made_by, made_by2, type, cover_pub, title, location, txt
 // Protected by _middleware.js
 
 export async function onRequestPost(context) {
@@ -35,7 +35,7 @@ export async function onRequestPost(context) {
     made_by:   get('made_by'),
     made_by2:  get('made_by2'),
     type:      get('type'),
-    first_pub: formData.get('first_pub') === '1st' ? '1st' : '-',
+    cover_pub: formData.get('cover_pub') === 'Cover' ? 'Cover' : '-',
     title:     get('title'),
     location:  get('location'),
     txt:       get('txt'),
@@ -50,12 +50,12 @@ export async function onRequestPost(context) {
     // 2. Store metadata in D1
     await env.DB.prepare(
       `INSERT INTO images
-        (id, uploaded_at, r2_key, date, made_by, made_by2, type, first_pub, title, location, txt)
+        (id, uploaded_at, r2_key, date, made_by, made_by2, type, cover_pub, title, location, txt)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       id, now, r2Key,
       meta.date, meta.made_by, meta.made_by2, meta.type,
-      meta.first_pub, meta.title, meta.location, meta.txt
+      meta.cover_pub, meta.title, meta.location, meta.txt
     ).run();
 
     return json({ success: true, id, r2_key: r2Key });

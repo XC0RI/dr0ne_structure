@@ -42,10 +42,10 @@ function uploadModalHTML() {
       <label>type</label>
       <input type="text" id="f-type" placeholder="—">
 
-      <label>1st</label>
-      <select id="f-first-pub">
+      <label>cover</label>
+      <select id="f-cover-pub">
         <option value="-">—</option>
-        <option value="1st">1st</option>
+        <option value="Cover">Cover</option>
       </select>
 
       <label>title</label>
@@ -108,7 +108,7 @@ function attachUploadHandlers() {
     form.append('made_by',   document.getElementById('f-made-by').value);
     form.append('made_by2',  document.getElementById('f-made-by2').value.trim());
     form.append('type',      document.getElementById('f-type').value.trim());
-    form.append('first_pub', document.getElementById('f-first-pub').value);
+    form.append('cover_pub', document.getElementById('f-cover-pub').value);
     form.append('title',     document.getElementById('f-title').value.trim());
     form.append('location',  document.getElementById('f-location').value.trim());
     form.append('txt',       document.getElementById('f-txt').value.trim());
@@ -170,10 +170,10 @@ function editModalHTML(img) {
       <label>type</label>
       <input type="text" id="e-type" value="${v('type')}" placeholder="—">
 
-      <label>1st</label>
-      <select id="e-first-pub">
-        <option value="-"   ${sel('first_pub','-')}>—</option>
-        <option value="1st" ${sel('first_pub','1st')}>1st</option>
+      <label>cover</label>
+      <select id="e-cover-pub">
+        <option value="-"   ${sel('cover_pub','-')}>—</option>
+        <option value="Cover" ${sel('cover_pub','Cover')}>Cover</option>
       </select>
 
       <label>title</label>
@@ -208,7 +208,7 @@ function attachEditHandlers(id) {
       made_by:   document.getElementById('e-made-by').value,
       made_by2:  document.getElementById('e-made-by2').value.trim()  || '-',
       type:      document.getElementById('e-type').value.trim()      || '-',
-      first_pub: document.getElementById('e-first-pub').value,
+      cover_pub: document.getElementById('e-cover-pub').value,
       title:     document.getElementById('e-title').value.trim()     || '-',
       location:  document.getElementById('e-location').value.trim()  || '-',
       txt:       document.getElementById('e-txt').value.trim()       || '-',

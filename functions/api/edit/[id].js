@@ -13,7 +13,7 @@ export async function onRequestPut(context) {
   catch { return json({ error: 'Invalid JSON' }, 400); }
 
   // Allowed fields to update (never allow r2_key or id or uploaded_at)
-  const ALLOWED = ['date', 'made_by', 'made_by2', 'type', 'first_pub', 'title', 'location', 'txt'];
+  const ALLOWED = ['date', 'made_by', 'made_by2', 'type', 'cover_pub', 'title', 'location', 'txt'];
 
   const updates = {};
   for (const key of ALLOWED) {

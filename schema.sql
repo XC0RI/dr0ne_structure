@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS images (
   made_by     TEXT    NOT NULL DEFAULT '-',
   made_by2    TEXT    NOT NULL DEFAULT '-',
   type        TEXT    NOT NULL DEFAULT '-',
-  first_pub   TEXT    NOT NULL DEFAULT '-',
+  cover_pub   TEXT    NOT NULL DEFAULT '-',
   title       TEXT    NOT NULL DEFAULT '-',
   location    TEXT    NOT NULL DEFAULT '-',
   txt         TEXT    NOT NULL DEFAULT '-'
@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS images (
 
 CREATE INDEX IF NOT EXISTS idx_uploaded_at ON images(uploaded_at DESC);
 CREATE INDEX IF NOT EXISTS idx_date        ON images(date);
+CREATE INDEX IF NOT EXISTS idx_cover_pub   ON images(cover_pub);
 CREATE INDEX IF NOT EXISTS idx_made_by     ON images(made_by);
 CREATE INDEX IF NOT EXISTS idx_type        ON images(type);
 CREATE INDEX IF NOT EXISTS idx_title       ON images(title);
