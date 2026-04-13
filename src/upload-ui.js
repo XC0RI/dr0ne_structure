@@ -42,10 +42,10 @@ function uploadModalHTML() {
       <label>type</label>
       <input type="text" id="f-type" placeholder="—">
 
-      <label>cover</label>
+      <label>1st</label>
       <select id="f-first-pub">
         <option value="-">—</option>
-        <option value="Cover">Cover</option>
+        <option value="1st">1st</option>
       </select>
 
       <label>title</label>
@@ -170,10 +170,10 @@ function editModalHTML(img) {
       <label>type</label>
       <input type="text" id="e-type" value="${v('type')}" placeholder="—">
 
-      <label>cover</label>
+      <label>1st</label>
       <select id="e-first-pub">
         <option value="-"   ${sel('first_pub','-')}>—</option>
-        <option value="Cover" ${sel('first_pub','Cover')}>Cover</option>
+        <option value="1st" ${sel('first_pub','1st')}>1st</option>
       </select>
 
       <label>title</label>
