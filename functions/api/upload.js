@@ -35,7 +35,7 @@ export async function onRequestPost(context) {
     made_by:   get('made_by'),
     made_by2:  get('made_by2'),
     type:      get('type'),
-    first_pub: formData.get('first_pub') === '1st' ? '1st' : '-',
+    first_pub: formData.get('first_pub') === 'Cover' ? 'Cover' : '-',
     title:     get('title'),
     location:  get('location'),
     txt:       get('txt'),
@@ -63,6 +63,16 @@ export async function onRequestPost(context) {
     console.error('Upload error:', err);
     // Attempt R2 cleanup if D1 failed
     try { await env.BUCKET.delete(r2Key); } catch {}
+    return json({ error: 'Upload failed' }, 500);
+  }
+}
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'Content-Type': 'application/json' }
+  });
+}    try { await env.BUCKET.delete(r2Key); } catch {}
     return json({ error: 'Upload failed' }, 500);
   }
 }
