@@ -201,7 +201,7 @@ html, body {
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
 }
 
-/* ── Fall 1: >= 1560px — all columns visible ──────────────── */
+/* ── Fall 1: >= 1450px — all columns visible ──────────────── */
 #archive-table col.col-position { width: 6%; }
 #archive-table col.col-date     { width: 6%; }
 #archive-table col.col-made-by  { width: 9%; }
@@ -212,8 +212,8 @@ html, body {
 #archive-table col.col-location { width: 9%; }
 #archive-table col.col-txt      { width: 25%; }
 
-/* ── Fall 2: 1200px–1559px — hide txt ────────────────────── */
-@media (max-width: 1559px) {
+/* ── Fall 2: 1150px–1449px — hide txt ────────────────────── */
+@media (max-width: 1449px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table td.txt, #archive-table th.txt { padding: 0; overflow: hidden; max-width: 0; }
   #archive-table col.col-position { width: 7%; }
@@ -226,8 +226,8 @@ html, body {
   #archive-table col.col-location { width: 23%; }
 }
 
-/* ── Fall 3: 960px–1199px — hide txt, location ─────────────── */
-@media (max-width: 1199px) {
+/* ── Fall 3: 950px–1149px — hide txt, location ─────────────── */
+@media (max-width: 1149px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table td.txt,      #archive-table th.txt      { padding: 0; overflow: hidden; max-width: 0; }
@@ -241,8 +241,8 @@ html, body {
   #archive-table col.col-title    { width: 37%; }
 }
 
-/* ── Fall 4: 820px–959px — hide txt, location, cover ──────── */
-@media (max-width: 959px) {
+/* ── Fall 4: 800px–949px — hide txt, location, cover ──────── */
+@media (max-width: 949px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-cover    { width: 0; }
@@ -257,8 +257,8 @@ html, body {
   #archive-table col.col-title    { width: 36%; }
 }
 
-/* ── Fall 5: 670px–819px — hide txt, location, cover, type ── */
-@media (max-width: 819px) {
+/* ── Fall 5: 700px–799px — hide txt, location, cover, type ── */
+@media (max-width: 799px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-cover    { width: 0; }
@@ -274,8 +274,8 @@ html, body {
   #archive-table col.col-title    { width: 39%; }
 }
 
-/* ── Fall 6: < 670px — hide txt, location, cover, type, date ─ */
-@media (max-width: 669px) {
+/* ── Fall 6: < 700px — hide txt, location, cover, type, date ─ */
+@media (max-width: 699px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-cover    { width: 0; }
