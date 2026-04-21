@@ -45,7 +45,6 @@
   <!-- ── Screenshot button ───────────────────────────────────────────── -->
   <button id="screenshot-btn" aria-label="Screenshot">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-      <!-- crosshair -->
       <line x1="12" y1="2"  x2="12" y2="7"/>
       <line x1="12" y1="17" x2="12" y2="22"/>
       <line x1="2"  y1="12" x2="7"  y2="12"/>
@@ -71,7 +70,7 @@
   <!-- ── Upload / Edit modal ──────────────────────────────────────────── -->
   <div id="modal-overlay"></div>
 
-  <!-- ── Login modal (separate, simpler) ─────────────────────────────── -->
+  <!-- ── Login modal ─────────────────────────────────────────────────── -->
   <div id="login-overlay" class="hidden" style="
     position:fixed;inset:0;z-index:300;
     background:rgba(0,0,0,0.85);
@@ -87,10 +86,10 @@
   </div>
 
   <script type="module">
-    import { initCollage, blurCollage, unblurCollage, setArchiveOpen } from '/src/collage.js';
+    import { initCollage, blurCollage, unblurCollage, setArchiveOpen, setInfoVisible } from '/src/collage.js';
     import { openArchive, closeArchive, renderTableHeader } from '/src/archive.js';
-    import { openUploadModal, openEditModal }           from '/src/upload-ui.js';
-    import { isLoggedIn, login }                       from '/src/auth.js';
+    import { openUploadModal, openEditModal }               from '/src/upload-ui.js';
+    import { isLoggedIn, login }                           from '/src/auth.js';
 
     // ── Build archive table header ─────────────────────────────────────
     renderTableHeader();
@@ -108,7 +107,6 @@
       }
     }
 
-    // Expose reload hook for upload/edit modules
     window.__reloadImages = async () => {
       await loadImages();
       if (document.getElementById('archive-overlay').classList.contains('open')) {
@@ -116,7 +114,6 @@
       }
     };
 
-    // Expose modal hooks for archive module
     window.__openUploadModal = openUploadModal;
     window.__openEditModal   = openEditModal;
 
@@ -125,30 +122,30 @@
     initCollage(images);
 
     // ── DR0NE click: toggle archive ────────────────────────────────────
-    const droneLabel   = document.getElementById('drone-label');
+    const droneLabel     = document.getElementById('drone-label');
     const archiveOverlay = document.getElementById('archive-overlay');
 
     droneLabel.addEventListener('click', () => {
-      const isOpen = archiveOverlay.classList.contains('open');
+      const isOpen        = archiveOverlay.classList.contains('open');
       const screenshotBtn = document.getElementById('screenshot-btn');
-      const hideBtn2       = document.getElementById('hide-btn');
-      const infoBtn2       = document.getElementById('info-btn');
+      const hideBtn2      = document.getElementById('hide-btn');
+      const infoBtn2      = document.getElementById('info-btn');
       if (isOpen) {
         closeArchive();
         unblurCollage();
         setArchiveOpen(false);
         droneLabel.setAttribute('aria-label', 'Open archive');
         screenshotBtn.style.display = '';
-        hideBtn2.style.display = '';
-        infoBtn2.style.display = '';
+        hideBtn2.style.display      = '';
+        infoBtn2.style.display      = '';
       } else {
         openArchive(images);
         blurCollage();
         setArchiveOpen(true);
         droneLabel.setAttribute('aria-label', 'Close archive');
         screenshotBtn.style.display = 'none';
-        hideBtn2.style.display = 'none';
-        infoBtn2.style.display = 'none';
+        hideBtn2.style.display      = 'none';
+        infoBtn2.style.display      = 'none';
         document.getElementById('info-panel').classList.remove('open');
       }
     });
@@ -167,13 +164,12 @@
         unblurCollage();
         setArchiveOpen(false);
         document.getElementById('screenshot-btn').style.display = '';
-        document.getElementById('hide-btn').style.display = '';
-        document.getElementById('info-btn').style.display = '';
+        document.getElementById('hide-btn').style.display       = '';
+        document.getElementById('info-btn').style.display       = '';
       }
     });
 
     // ── Login flow ─────────────────────────────────────────────────────
-    // Hidden login trigger: hold Shift and click DR0NE when archive is open
     droneLabel.addEventListener('click', (e) => {
       if (e.shiftKey && !isLoggedIn() && archiveOverlay.classList.contains('open')) {
         showLoginModal();
@@ -192,7 +188,7 @@
       lo.classList.add('hidden');
       lo.style.display = '';
       document.getElementById('login-error').textContent = '';
-      document.getElementById('login-password').value = '';
+      document.getElementById('login-password').value   = '';
     }
 
     document.getElementById('login-submit').addEventListener('click', async () => {
@@ -202,7 +198,6 @@
       try {
         await login(pw);
         hideLoginModal();
-        // Refresh archive to show admin controls
         openArchive(images);
       } catch (e) {
         err.textContent = e.message;
@@ -216,28 +211,30 @@
     document.getElementById('login-cancel').addEventListener('click', hideLoginModal);
 
     // ── Hide/show texts ────────────────────────────────────────────────
-    const hideBtn = document.getElementById('hide-btn');
+    // Hides frame-info (via setInfoVisible), screenshot-btn, info-btn
+    const hideBtn   = document.getElementById('hide-btn');
     let textsHidden = false;
 
     hideBtn.addEventListener('click', () => {
       textsHidden = !textsHidden;
-      const elements = [
-        ...document.querySelectorAll('.frame-info'),
-        document.getElementById('screenshot-btn'),
-        document.getElementById('info-btn'),
-        document.getElementById('info-panel'),
-      ];
-      elements.forEach(el => {
-        if (el) el.style.opacity = textsHidden ? '0' : '';
-      });
-      // Switch - to +
+
+      // Sync frame-info visibility with global flag in collage.js
+      setInfoVisible(!textsHidden);
+
+      // Also hide/show screenshot and info buttons
+      const screenshotBtn = document.getElementById('screenshot-btn');
+      const infoBtn3      = document.getElementById('info-btn');
+      if (screenshotBtn) screenshotBtn.style.opacity = textsHidden ? '0' : '';
+      if (infoBtn3)      infoBtn3.style.opacity      = textsHidden ? '0' : '';
+
+      // Switch − to + and back
       const svg = hideBtn.querySelector('svg');
       if (textsHidden) {
         svg.innerHTML = `<circle cx="12" cy="12" r="10"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="12" y1="7" x2="12" y2="17"/>`;
       } else {
         svg.innerHTML = `<circle cx="12" cy="12" r="10"/><line x1="7" y1="12" x2="17" y2="12"/>`;
       }
-      // Also close info panel if open
+
       if (textsHidden) document.getElementById('info-panel').classList.remove('open');
     });
 
@@ -250,7 +247,6 @@
       infoPanel.classList.toggle('open');
     });
 
-    // Close info panel when clicking outside
     document.addEventListener('click', (e) => {
       if (!infoPanel.contains(e.target) && !infoBtn.contains(e.target)) {
         infoPanel.classList.remove('open');
@@ -265,7 +261,6 @@
 
       btn.style.visibility = 'hidden';
 
-      // Show white flash immediately — don't wait for canvas
       flash.style.cssText = 'position:fixed;inset:0;z-index:500;background:#fff;display:block;';
 
       try {
@@ -273,18 +268,15 @@
         const vw  = window.innerWidth;
         const vh  = window.innerHeight;
 
-        // Final canvas = exact viewport size
         const canvas = document.createElement('canvas');
         canvas.width  = vw * dpr;
         canvas.height = vh * dpr;
         const ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
 
-        // Black background
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, vw, vh);
 
-        // Draw each frame: replicate object-fit:cover + transform:scale/translate
         const frames = document.querySelectorAll('.frame');
         for (const frame of frames) {
           const rect = frame.getBoundingClientRect();
@@ -296,7 +288,6 @@
           const fw = rect.width;
           const fh = rect.height;
 
-          // Parse transform from inline style: scale(z) translate(tx%, ty%)
           const styleTransform = img.style.transform || '';
           const scaleMatch     = styleTransform.match(/scale\(([\d.]+)\)/);
           const translateMatch = styleTransform.match(/translate\(([-\d.]+)%,\s*([-\d.]+)%\)/);
@@ -304,83 +295,75 @@
           const tx   = translateMatch ? parseFloat(translateMatch[1]) : 0;
           const ty   = translateMatch ? parseFloat(translateMatch[2]) : 0;
 
-          // object-fit: cover
           const coverScale = Math.max(fw / iw, fh / ih);
           const dispW = iw * coverScale;
           const dispH = ih * coverScale;
 
-          // Replicate CSS transform exactly using canvas transforms:
-          // transform-origin: center → translate to center, apply scale+translate, translate back
           ctx.save();
           ctx.beginPath();
           ctx.rect(rect.left, rect.top, fw, fh);
           ctx.clip();
-
-          // Move to frame center
           ctx.translate(rect.left + fw / 2, rect.top + fh / 2);
-          // Apply scale
           ctx.scale(zoom, zoom);
-          // Apply translate (% of frame size)
           ctx.translate((tx / 100) * fw, (ty / 100) * fh);
-          // Draw image centered (cover already centers it)
           ctx.drawImage(img, -dispW / 2, -dispH / 2, dispW, dispH);
           ctx.restore();
 
-          // Draw frame-info text — read exact positions from DOM
-          const info = frame.querySelector('.frame-info');
-          if (info) {
-            const ps = Array.from(info.querySelectorAll('p'));
-            if (ps.length > 0) {
-              const fsinfo = Math.min(Math.max(vw * 0.06, 24), 38) / 3;
-              ctx.save();
-              ctx.beginPath();
-              ctx.rect(rect.left, rect.top, fw, fh);
-              ctx.clip();
-              const isRightFrame = rect.left >= vw / 2;
-              ctx.font          = `normal ${fsinfo}px GeistDr0ne, sans-serif`;
-              ctx.fillStyle     = '#ffffff';
-              ctx.shadowColor   = 'rgba(0,0,0,0.4)';
-              ctx.shadowBlur    = 8;
-              ctx.shadowOffsetX = 0;
-              ctx.shadowOffsetY = 1;
-              ctx.textBaseline  = 'hanging';
-              ctx.textAlign     = isRightFrame ? 'right' : 'left';
-              for (const p of ps) {
-                const pr = p.getBoundingClientRect();
-                const x  = isRightFrame ? pr.right : pr.left;
-                ctx.fillText(p.textContent.trim(), x, pr.top);
+          // Draw frame-info text — all left-aligned now
+          const infoWrap = frame.querySelector('.frame-info-wrap');
+          if (infoWrap && !infoWrap.classList.contains('hidden')) {
+            const info = infoWrap.querySelector('.frame-info');
+            if (info) {
+              const ps = Array.from(info.querySelectorAll('p'));
+              if (ps.length > 0) {
+                const fsinfo = Math.min(Math.max(vw * 0.06, 24), 38) / 4;
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(rect.left, rect.top, fw, fh);
+                ctx.clip();
+                ctx.font          = `normal ${fsinfo}px GeistDr0ne, sans-serif`;
+                ctx.fillStyle     = '#ffffff';
+                ctx.shadowColor   = 'rgba(0,0,0,0.4)';
+                ctx.shadowBlur    = 8;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 1;
+                ctx.textBaseline  = 'hanging';
+                ctx.textAlign     = 'left';
+                for (const p of ps) {
+                  const pr = p.getBoundingClientRect();
+                  ctx.fillText(p.textContent.trim(), pr.left, pr.top);
+                }
+                ctx.restore();
               }
-              ctx.restore();
             }
           }
         }
 
         // Draw DR0NE label
-        const dl    = document.getElementById('drone-label');
-        const dlR   = dl.getBoundingClientRect();
-        const fs = Math.min(Math.max(vw * 0.06, 24), 38);
+        const dl  = document.getElementById('drone-label');
+        const dlR = dl.getBoundingClientRect();
+        const fs  = Math.min(Math.max(vw * 0.06, 24), 38);
         ctx.save();
-        ctx.font         = `normal ${fs}px GeistDr0ne, sans-serif`;
-        ctx.fillStyle    = '#ffffff';
-        ctx.textAlign    = 'left';
-        ctx.textBaseline = 'hanging';
+        ctx.font          = `normal ${fs}px GeistDr0ne, sans-serif`;
+        ctx.fillStyle     = '#ffffff';
+        ctx.textAlign     = 'left';
+        ctx.textBaseline  = 'hanging';
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 1;
-        ctx.shadowColor  = 'rgba(0,0,0,0.6)';
-        ctx.shadowBlur   = 4;
+        ctx.shadowColor   = 'rgba(0,0,0,0.6)';
+        ctx.shadowBlur    = 4;
         ctx.fillText('DR0NE', dlR.left, dlR.top);
-        // Second pass for the wider shadow layer
         ctx.shadowOffsetY = 2;
-        ctx.shadowColor  = 'rgba(0,0,0,0.5)';
-        ctx.shadowBlur   = 16;
+        ctx.shadowColor   = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur    = 16;
         ctx.fillText('DR0NE', dlR.left, dlR.top);
         ctx.restore();
 
         // Watermark
         ctx.save();
-        const wmSize = Math.round(Math.min(Math.max(vw * 0.06, 24), 38) / 2);
-        ctx.font         = `500 ${wmSize}px GeistDr0ne, sans-serif`;
-        ctx.fillStyle    = 'rgba(255,255,255,0.11)';
+        const wmSize    = Math.round(Math.min(Math.max(vw * 0.06, 24), 38) / 2);
+        ctx.font        = `500 ${wmSize}px GeistDr0ne, sans-serif`;
+        ctx.fillStyle   = 'rgba(255,255,255,0.11)';
         ctx.textBaseline = 'middle';
         const wmText    = 'https://dr0ne.world ';
         const wmMetrics = ctx.measureText(wmText);
@@ -402,43 +385,39 @@
 
         const dataUrl = canvas.toDataURL('image/png');
 
-        // Insert screenshot behind the existing white overlay
         const img = document.createElement('img');
         img.src = dataUrl;
         img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0;';
         flash.insertBefore(img, flash.firstChild);
 
-        // White overlay on top that fades out
         const whiteOverlay = document.createElement('div');
         whiteOverlay.style.cssText = 'position:absolute;inset:0;background:#fff;transition:opacity 1.3s ease;z-index:1;';
         flash.appendChild(whiteOverlay);
 
-        // Trigger fade
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             whiteOverlay.style.opacity = '0';
           });
         });
 
-        // After white fades (1.3s): hold screenshot then fade out — total ~2s
         setTimeout(() => {
           flash.style.transition = 'opacity 0.4s ease';
-          flash.style.opacity = '0';
+          flash.style.opacity    = '0';
           setTimeout(() => {
-            flash.style.display = 'none';
-            flash.style.opacity = '';
+            flash.style.display    = 'none';
+            flash.style.opacity    = '';
             flash.style.transition = '';
-            flash.innerHTML = '';
+            flash.innerHTML        = '';
           }, 400);
         }, 2000);
 
-        // Trigger download
-        const a = document.createElement('a');
+        // Download — filename: DR0NE 2026-03-25 at 15.09.41
+        const a    = document.createElement('a');
         a.href     = dataUrl;
-        const now = new Date();
+        const now  = new Date();
         const pad2 = n => String(n).padStart(2, '0');
         const datePart = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
-        const timePart = `${pad2(now.getHours())}:${pad2(now.getMinutes())}:${pad2(now.getSeconds())}`;
+        const timePart = `${pad2(now.getHours())}.${pad2(now.getMinutes())}.${pad2(now.getSeconds())}`;
         a.download = `DR0NE ${datePart} at ${timePart}.png`;
         a.click();
 
