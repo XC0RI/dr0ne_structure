@@ -4,8 +4,8 @@
 import { isLoggedIn, authHeaders } from './auth.js';
 
 let allImages     = [];
-let activeFilters = {};   // { columnKey: value }
-let alphaSort     = null; // column key currently sorted alphabetically, or null
+let activeFilters = {};
+let alphaSort     = null;
 
 const overlay   = document.getElementById('archive-overlay');
 const filterBar = document.getElementById('filter-bar');
@@ -22,31 +22,27 @@ export function openArchive(images) {
   renderFilterBar();
   renderAdminBar();
 
-  // Prevent body scroll bleed-through
   document.body.style.overflow = 'hidden';
 
-  // Animate in: display first, then opacity
   overlay.classList.add('open');
-  overlay.style.opacity  = '0';
+  overlay.style.opacity       = '0';
   overlay.style.pointerEvents = 'none';
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      overlay.style.opacity  = '1';
+      overlay.style.opacity       = '1';
       overlay.style.pointerEvents = 'auto';
     });
   });
 }
 
 export function closeArchive() {
-  overlay.style.opacity = '0';
+  overlay.style.opacity       = '0';
   overlay.style.pointerEvents = 'none';
-  setTimeout(() => {
-    overlay.classList.remove('open');
-  }, 500);
+  setTimeout(() => overlay.classList.remove('open'), 500);
   document.body.style.overflow = '';
 }
 
-// ─── Columns definition ────────────────────────────────────────────────────────
+// ─── Columns ──────────────────────────────────────────────────────────────────
 
 const COLUMNS = [
   { key: 'thumb',     label: '0',         filterable: false, sortable: false },
@@ -79,12 +75,9 @@ function filteredImages() {
     list = [...list].sort((a, b) => {
       const av = getCellValue(a, alphaSort);
       const bv = getCellValue(b, alphaSort);
-      // Exact "-" sorts to the end; all other values sort alphabetically
-      const aIsDash = av === '-';
-      const bIsDash = bv === '-';
-      if (aIsDash && bIsDash) return 0;  // both "-": keep chronological order
-      if (aIsDash) return 1;             // a is "-": goes after b
-      if (bIsDash) return -1;            // b is "-": goes after a
+      if (av === '-' && bv === '-') return 0;
+      if (av === '-') return 1;
+      if (bv === '-') return -1;
       return av.toLowerCase().localeCompare(bv.toLowerCase());
     });
   }
@@ -98,7 +91,6 @@ export function renderTableHeader() {
   if (!thead) return;
   thead.innerHTML = '';
 
-  // Insert colgroup for fixed widths (must be sibling of thead in table)
   const table = document.getElementById('archive-table');
   const existing = table.querySelector('colgroup');
   if (existing) existing.remove();
@@ -116,31 +108,22 @@ export function renderTableHeader() {
   table.insertBefore(colgroup, thead);
 
   const tr = document.createElement('tr');
-
   COLUMNS.forEach(col => {
     const th = document.createElement('th');
-    th.className = col.key;
+    th.className   = col.key;
     th.textContent = col.label;
-
     if (col.sortable) {
       th.style.cursor = 'pointer';
       th.title = `Sort by ${col.label} alphabetically`;
       th.addEventListener('click', () => {
-        if (alphaSort === col.key) {
-          // Toggle off
-          alphaSort = null;
-        } else {
-          alphaSort = col.key;
-        }
+        alphaSort = alphaSort === col.key ? null : col.key;
         renderTable();
         renderFilterBar();
       });
     }
-
     tr.appendChild(th);
   });
 
-  // Extra th for admin column
   const adminTh = document.createElement('th');
   adminTh.className = 'admin-col';
   tr.appendChild(adminTh);
@@ -154,7 +137,6 @@ function renderTable() {
   const total   = visible.length;
   tableBody.innerHTML = '';
 
-  // Toggle admin-mode: set class AND directly update col width
   const table = document.getElementById('archive-table');
   if (table) {
     const loggedIn = isLoggedIn();
@@ -176,29 +158,22 @@ function renderTable() {
         thumb.alt = '';
         td.appendChild(thumb);
 
-        // Click: close archive
-        td.addEventListener('click', () => closeArchive());
-
-        // Hover preview (desktop)
-        td.addEventListener('mouseenter', () => showPreview(img.r2_key, td));
+        // Hover preview only — no click-to-close
+        td.addEventListener('mouseenter', () => showPreview(img.r2_key));
         td.addEventListener('mouseleave', hidePreview);
-
-        // Touch preview (mobile) — prevent scroll on this cell
         td.addEventListener('touchstart', (e) => {
           e.preventDefault();
-          showPreview(img.r2_key, td);
+          showPreview(img.r2_key);
         }, { passive: false });
-        td.addEventListener('touchend',   hidePreview);
+        td.addEventListener('touchend',    hidePreview);
         td.addEventListener('touchcancel', hidePreview);
 
       } else if (col.key === 'position') {
-        // 1 at bottom, n at top
         td.textContent = total - posIdx;
 
       } else {
         const val = getCellValue(img, col.key);
         td.textContent = val;
-
         if (col.filterable) {
           td.addEventListener('click', () => setFilter(col.key, val));
         }
@@ -207,22 +182,19 @@ function renderTable() {
       tr.appendChild(td);
     });
 
-    // Admin buttons
     if (isLoggedIn()) {
       const adminTd = document.createElement('td');
       adminTd.className = 'admin-col';
 
-      // Edit button: = in circle
       const editBtn = document.createElement('button');
       editBtn.className = 'admin-icon-btn';
-      editBtn.title = 'edit';
+      editBtn.title     = 'edit';
       editBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="7" y1="10" x2="17" y2="10"/><line x1="7" y1="14" x2="17" y2="14"/></svg>`;
       editBtn.addEventListener('click', (e) => { e.stopPropagation(); window.__openEditModal(img); });
 
-      // Delete button: × in circle
       const delBtn = document.createElement('button');
       delBtn.className = 'admin-icon-btn';
-      delBtn.title = 'delete';
+      delBtn.title     = 'delete';
       delBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/></svg>`;
       delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteImage(img.id); });
 
@@ -240,21 +212,19 @@ function renderTable() {
 function renderFilterBar() {
   filterBar.innerHTML = '';
 
-  // Active value filters
   Object.entries(activeFilters).forEach(([key, val]) => {
     const badge = document.createElement('span');
-    badge.className = 'filter-badge';
-    const colLabel = COLUMNS.find(c => c.key === key)?.label ?? key;
+    badge.className   = 'filter-badge';
+    const colLabel    = COLUMNS.find(c => c.key === key)?.label ?? key;
     badge.textContent = `${colLabel}: ${val}  ×`;
     badge.addEventListener('click', () => removeFilter(key));
     filterBar.appendChild(badge);
   });
 
-  // Active alpha sort badge
   if (alphaSort) {
     const badge = document.createElement('span');
-    badge.className = 'filter-badge';
-    const colLabel = COLUMNS.find(c => c.key === alphaSort)?.label ?? alphaSort;
+    badge.className   = 'filter-badge';
+    const colLabel    = COLUMNS.find(c => c.key === alphaSort)?.label ?? alphaSort;
     badge.textContent = `${colLabel} in alphabetical order  ×`;
     badge.addEventListener('click', () => {
       alphaSort = null;
@@ -273,12 +243,12 @@ function renderAdminBar() {
   if (!isLoggedIn()) return;
 
   const uploadBtn = document.createElement('button');
-  uploadBtn.className = 'btn';
+  uploadBtn.className   = 'btn';
   uploadBtn.textContent = '+ upload';
   uploadBtn.addEventListener('click', () => window.__openUploadModal());
 
   const logoutBtn = document.createElement('button');
-  logoutBtn.className = 'btn';
+  logoutBtn.className   = 'btn';
   logoutBtn.textContent = 'logout';
   logoutBtn.addEventListener('click', () => {
     import('./auth.js').then(({ logout }) => {
@@ -310,18 +280,15 @@ function removeFilter(key) {
 
 let previewEl = null;
 
-function showPreview(r2Key, anchorEl) {
+function showPreview(r2Key) {
   hidePreview();
 
   const img = document.createElement('img');
   img.src = `/img/${r2Key}`;
   img.style.cssText = `
-    position: fixed;
-    z-index: 300;
-    display: none;
+    position: fixed; z-index: 300; display: none;
     box-shadow: 0 4px 32px rgba(0,0,0,0.7);
-    pointer-events: none;
-    object-fit: contain;
+    pointer-events: none; object-fit: contain;
   `;
 
   img.onload = () => {
@@ -331,21 +298,19 @@ function showPreview(r2Key, anchorEl) {
     const iw = img.naturalWidth;
     const ih = img.naturalHeight;
 
-    // Scale to target area
     let scale = Math.sqrt(targetArea / (iw * ih));
     let w = iw * scale;
     let h = ih * scale;
 
-    // Clamp to 10/12 of screen
     const maxW = sw * (10 / 12);
     const maxH = sh * (10 / 12);
     if (w > maxW) { scale = maxW / iw; w = maxW; h = ih * scale; }
     if (h > maxH) { scale = maxH / ih; h = maxH; w = iw * scale; }
 
-    img.style.width  = `${Math.round(w)}px`;
-    img.style.height = `${Math.round(h)}px`;
-    img.style.left   = `${Math.round((sw - w) / 2)}px`;
-    img.style.top    = `${Math.round((sh - h) / 2)}px`;
+    img.style.width   = `${Math.round(w)}px`;
+    img.style.height  = `${Math.round(h)}px`;
+    img.style.left    = `${Math.round((sw - w) / 2)}px`;
+    img.style.top     = `${Math.round((sh - h) / 2)}px`;
     img.style.display = 'block';
   };
 
@@ -354,10 +319,7 @@ function showPreview(r2Key, anchorEl) {
 }
 
 function hidePreview() {
-  if (previewEl) {
-    previewEl.remove();
-    previewEl = null;
-  }
+  if (previewEl) { previewEl.remove(); previewEl = null; }
 }
 
 // ─── Delete ────────────────────────────────────────────────────────────────────
