@@ -11,7 +11,7 @@
 /* ─── Variables ─────────────────────────────────────────── */
 :root {
   --fs:      clamp(24px, 6vw, 38px);
-  --fs-info: calc(var(--fs) / 3);
+  --fs-info: calc(var(--fs) / 4);     /* smaller than before (was /3) */
 
   --white:       #ffffff;
   --black:       #000000;
@@ -33,7 +33,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  overscroll-behavior: none;   /* prevents Mac rubber-band from swallowing wheel events */
+  overscroll-behavior: none;
   background: var(--black);
   font-family: var(--font-main);
   font-weight: 500;
@@ -65,7 +65,6 @@ html, body {
   .collage { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
 }
 
-/* Blur & dim collage when archive is open — animated via transition above */
 .collage-blurred {
   filter: blur(12px) brightness(0.9);
   pointer-events: none;
@@ -86,21 +85,41 @@ html, body {
   object-fit: cover;
 }
 
-/* ─── Info text per frame ────────────────────────────────── */
-.frame-info {
+/* ─── Frame info wrapper ─────────────────────────────────── */
+/* Wraps the text block + close button. Always left-aligned. */
+.frame-info-wrap {
   position: absolute;
   z-index: 2;
-  line-height: 1.35;
-  pointer-events: none;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 6px;
+  pointer-events: auto;
 }
 
-@media (orientation: landscape) {
-  .frame:first-child .frame-info { bottom: var(--pad); left: var(--pad);  text-align: left; }
-  .frame:last-child  .frame-info { bottom: var(--pad); right: var(--pad); text-align: right; }
+.frame-info-wrap.hidden {
+  display: none;
 }
+
+/* Landscape: both frames bottom-left */
+@media (orientation: landscape) {
+  .frame:first-child .frame-info-wrap,
+  .frame:last-child  .frame-info-wrap {
+    bottom: var(--pad);
+    left: var(--pad);
+  }
+}
+/* Portrait: first frame top-left, second frame bottom-left */
 @media (orientation: portrait) {
-  .frame:first-child .frame-info { top: var(--pad);    bottom: auto; left: var(--pad); text-align: left; }
-  .frame:last-child  .frame-info { bottom: var(--pad); top: auto;    left: var(--pad); text-align: left; }
+  .frame:first-child .frame-info-wrap { top: var(--pad);    bottom: auto; left: var(--pad); }
+  .frame:last-child  .frame-info-wrap { bottom: var(--pad); top: auto;    left: var(--pad); }
+}
+
+/* ─── Info text per frame ────────────────────────────────── */
+.frame-info {
+  line-height: 1.2;
+  pointer-events: none;
+  text-align: left;
 }
 
 .frame-info p {
@@ -109,10 +128,59 @@ html, body {
   font-weight: 500;
   color: var(--white);
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
-  margin: 0;
-  line-height: 1.5;
+  margin: 0 0 1px 0;    /* very tight vertical spacing */
+  line-height: 1.2;
 }
-.frame-info p:not(:last-child) { margin-bottom: 0.25em; }
+
+/* ─── Info close button (−) ──────────────────────────────── */
+/* Sits top-right of the info wrap */
+.info-close-btn {
+  position: absolute;
+  top: 0;
+  right: calc(-1 * var(--fs-info) - 6px);
+  background: none;
+  border: none;
+  color: var(--white);
+  font-family: var(--font-main);
+  font-size: var(--fs-info);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  pointer-events: auto;
+}
+.info-close-btn:hover { opacity: 1; }
+
+/* ─── Info toggle button (i) ─────────────────────────────── */
+/* Shown when info is hidden; sits at bottom-left of the frame */
+.info-toggle-btn {
+  position: absolute;
+  z-index: 2;
+  background: none;
+  border: none;
+  color: var(--white);
+  font-family: var(--font-main);
+  font-style: italic;
+  font-size: var(--fs-info);
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  pointer-events: auto;
+}
+.info-toggle-btn:hover { opacity: 1; }
+.info-toggle-btn.hidden { display: none; }
+
+@media (orientation: landscape) {
+  .frame:first-child .info-toggle-btn,
+  .frame:last-child  .info-toggle-btn { bottom: var(--pad); left: var(--pad); }
+}
+@media (orientation: portrait) {
+  .frame:first-child .info-toggle-btn { top: var(--pad);    left: var(--pad); }
+  .frame:last-child  .info-toggle-btn { bottom: var(--pad); left: var(--pad); }
+}
 
 /* ─── DR0NE centre label ─────────────────────────────────── */
 #drone-label {
@@ -131,14 +199,13 @@ html, body {
   line-height: 1;
 }
 
-
 /* ─── Archive Overlay ────────────────────────────────────── */
 #archive-overlay {
   position: fixed;
   inset: 0;
   z-index: 50;
   overflow-y: auto;
-  overscroll-behavior: contain;   /* prevents scroll bleed to collage */
+  overscroll-behavior: contain;
   display: none;
   opacity: 0;
   padding: var(--pad);
@@ -148,7 +215,6 @@ html, body {
 
 #archive-overlay.open { display: block; }
 
-/* Archive table */
 #archive-table {
   width: 100%;
   border-collapse: collapse;
@@ -157,10 +223,10 @@ html, body {
   color: var(--white);
 }
 
-/* ── Thumb: fixed size ─────────────────────────────────────── */
+/* ── Thumb ─────────────────────────────────────────────────── */
 #archive-table col.col-thumb { width: 52px; }
 
-/* ── Admin column: hidden by default, shown when logged in ─── */
+/* ── Admin column ──────────────────────────────────────────── */
 #archive-table col.col-admin                    { width: 0; }
 #archive-table th.admin-col,
 #archive-table td.admin-col                     { padding: 0; overflow: hidden; max-width: 0; }
@@ -181,7 +247,6 @@ html, body {
   white-space: nowrap;
 }
 
-/* Admin icon buttons */
 .admin-icon-btn {
   background: transparent;
   border: none;
@@ -201,7 +266,7 @@ html, body {
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
 }
 
-/* ── Fall 1: >= 1450px — all columns visible ──────────────── */
+/* ── Column widths ─────────────────────────────────────────── */
 #archive-table col.col-position { width: 6%; }
 #archive-table col.col-date     { width: 6%; }
 #archive-table col.col-made-by  { width: 9%; }
@@ -212,7 +277,6 @@ html, body {
 #archive-table col.col-location { width: 9%; }
 #archive-table col.col-txt      { width: 25%; }
 
-/* ── Fall 2: 1150px–1449px — hide txt ────────────────────── */
 @media (max-width: 1449px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table td.txt, #archive-table th.txt { padding: 0; overflow: hidden; max-width: 0; }
@@ -226,7 +290,6 @@ html, body {
   #archive-table col.col-location { width: 23%; }
 }
 
-/* ── Fall 3: 950px–1149px — hide txt, location ─────────────── */
 @media (max-width: 1149px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
@@ -241,7 +304,6 @@ html, body {
   #archive-table col.col-title    { width: 37%; }
 }
 
-/* ── Fall 4: 800px–949px — hide txt, location, cover ──────── */
 @media (max-width: 949px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
@@ -257,7 +319,6 @@ html, body {
   #archive-table col.col-title    { width: 36%; }
 }
 
-/* ── Fall 5: 700px–799px — hide txt, location, cover, type ── */
 @media (max-width: 799px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
@@ -274,7 +335,6 @@ html, body {
   #archive-table col.col-title    { width: 39%; }
 }
 
-/* ── Fall 6: < 700px — hide txt, location, cover, type, date ─ */
 @media (max-width: 699px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table col.col-location { width: 0; }
@@ -301,7 +361,6 @@ html, body {
   word-break: normal;
 }
 
-/* made_by2, title, txt: up to 5 lines, no mid-word break */
 #archive-table td.made_by2,
 #archive-table td.title,
 #archive-table td.txt {
@@ -329,15 +388,11 @@ html, body {
   letter-spacing: 0.03em;
 }
 
-
 #archive-table th[style*="cursor"] {
   opacity: 0.85;
   transition: opacity 0.15s;
 }
 #archive-table th[style*="cursor"]:hover { opacity: 1; }
-
-
-
 
 #archive-table tbody tr {
   border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -353,9 +408,10 @@ html, body {
 
 #archive-table td:hover { opacity: 0.65; }
 
+/* Thumbnail: not clickable, hover-preview only */
 #archive-table td.thumb {
   width: 48px;
-  cursor: pointer;
+  cursor: default;
 }
 #archive-table td.thumb img {
   width: 40px;
@@ -414,8 +470,11 @@ html, body {
 }
 #modal-overlay.open { display: flex; }
 
+/* Modal scrollable */
 .modal {
   width: min(480px, 90vw);
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 32px;
   border: 1px solid rgba(255,255,255,0.2);
   background: rgba(0,0,0,0.6);
@@ -476,6 +535,7 @@ html, body {
 
 /* ─── Utilities ──────────────────────────────────────────── */
 .hidden { display: none !important; }
+
 /* ─── Screenshot button ──────────────────────────────────── */
 #screenshot-btn {
   position: fixed;
@@ -493,9 +553,7 @@ html, body {
   transition: opacity 0.15s;
   line-height: 1;
 }
-
 #screenshot-btn:hover { opacity: 1; }
-
 #screenshot-btn svg {
   width: calc(var(--fs-info) * 2.3);
   height: calc(var(--fs-info) * 2.3);
@@ -511,7 +569,6 @@ html, body {
   display: none;
   background: #000;
 }
-
 #screenshot-flash img {
   width: 100%;
   height: 100%;
@@ -534,7 +591,6 @@ html, body {
   opacity: 0.85;
   transition: opacity 0.15s;
 }
-
 #hide-btn:hover,
 #info-btn:hover { opacity: 1; }
 
@@ -547,14 +603,6 @@ html, body {
   height: calc(var(--fs-info) * 1.6);
   display: block;
   filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
-}
-
-@media (orientation: landscape) {
-  #hide-btn svg,
-  #info-btn svg {
-    width: calc(var(--fs-info) * 1.6);
-    height: calc(var(--fs-info) * 1.6);
-  }
 }
 
 @media (orientation: portrait) {
@@ -570,23 +618,21 @@ html, body {
   position: fixed;
   top: 0;
   right: 0;
-  bottom: 50vh;              /* max half screen height */
+  bottom: 50vh;
   z-index: 99;
   width: clamp(260px, 35vw, 480px);
   padding: var(--pad);
-  padding-top: calc(var(--pad) * 2 + var(--fs-info) + 12px); /* below info btn */
+  padding-top: calc(var(--pad) * 2 + var(--fs-info) + 12px);
   overflow-y: auto;
   overscroll-behavior: contain;
   transform: translateX(100%);
   transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
   pointer-events: none;
 }
-
 #info-panel.open {
   transform: translateX(0);
   pointer-events: auto;
 }
-
 #info-panel p {
   font-size: var(--fs-info);
   font-family: var(--font-main);
@@ -598,20 +644,16 @@ html, body {
   overflow-wrap: break-word;
   margin-bottom: 1.2em;
 }
-
 #info-panel p:last-child { margin-bottom: 0; }
-
 #info-panel a {
   color: var(--white);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-
 #info-panel a:hover { opacity: 0.7; }
 
 /* ─── Mobile (portrait) button repositioning ────────────── */
 @media (orientation: portrait) {
-  /* Crosshair: left edge, vertically centered between the two images */
   #screenshot-btn {
     left: var(--pad);
     right: auto;
@@ -619,14 +661,10 @@ html, body {
     bottom: auto;
     transform: translateY(-50%);
   }
-
-  /* Hide button: bottom right corner */
   #hide-btn {
     left: auto;
     right: var(--pad);
     top: auto;
     bottom: var(--pad);
   }
-
-  /* Info button: top right corner (already there, no change needed) */
 }
