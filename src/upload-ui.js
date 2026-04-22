@@ -248,8 +248,8 @@ function closeModal() {
 // - Chrome/Firefox: convert to WebP
 // - Safari: convert to JPEG (Safari canvas cannot compress WebP)
 async function convertToWebP(file) {
-  const MAX_PX = 2500;
-  const MAX_MB = 1 * 1024 * 1024;
+  const MAX_PX = 2700;
+  const MAX_MB = 1.4 * 1024 * 1024;
 
   const ua = navigator.userAgent;
   const isSafari = ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Chromium');
