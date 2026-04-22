@@ -94,11 +94,13 @@ html, body {
   pointer-events: none;
 }
 
-.frame-info-wrap.hidden { display: none; }
+.frame-info-wrap.hidden { display: none !important; }
 
 @media (orientation: landscape) {
   .frame:first-child .frame-info-wrap { bottom: var(--pad); left: var(--pad);  }
   .frame:last-child  .frame-info-wrap { bottom: var(--pad); right: var(--pad); }
+  .frame:last-child  .frame-info,
+  .frame:last-child  .frame-info p { text-align: right; }
 }
 @media (orientation: portrait) {
   .frame:first-child .frame-info-wrap { top: var(--pad);    left: var(--pad); }
@@ -141,7 +143,7 @@ html, body {
   pointer-events: auto;
 }
 .info-close-btn:hover  { opacity: 1; }
-.info-close-btn.hidden { display: none; }
+.info-close-btn.hidden { display: none !important; }
 
 /* ─── i toggle button: top-LEFT of its frame ────────────── */
 .info-toggle-btn {
@@ -162,7 +164,7 @@ html, body {
   pointer-events: auto;
 }
 .info-toggle-btn:hover  { opacity: 1; }
-.info-toggle-btn.hidden { display: none; }
+.info-toggle-btn.hidden { display: none !important; }
 
 /* ─── DR0NE centre label ─────────────────────────────────── */
 #drone-label {
