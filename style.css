@@ -11,7 +11,7 @@
 /* ─── Variables ─────────────────────────────────────────── */
 :root {
   --fs:      clamp(24px, 6vw, 38px);
-  --fs-info: calc(var(--fs) / 4);     /* smaller than before (was /3) */
+  --fs-info: calc(var(--fs) / 4);     /* smaller: /4 instead of /3 */
 
   --white:       #ffffff;
   --black:       #000000;
@@ -85,41 +85,31 @@ html, body {
   object-fit: cover;
 }
 
-/* ─── Frame info wrapper ─────────────────────────────────── */
-/* Wraps the text block + close button. Always left-aligned. */
+/* ─── Info wrap ──────────────────────────────────────────── */
+/* Positioned at original corners: left frame = bottom-left,
+   right frame = bottom-right. Text always left-aligned. */
 .frame-info-wrap {
   position: absolute;
   z-index: 2;
-  display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  gap: 6px;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
-.frame-info-wrap.hidden {
-  display: none;
-}
+.frame-info-wrap.hidden { display: none; }
 
-/* Landscape: both frames bottom-left */
 @media (orientation: landscape) {
-  .frame:first-child .frame-info-wrap,
-  .frame:last-child  .frame-info-wrap {
-    bottom: var(--pad);
-    left: var(--pad);
-  }
+  .frame:first-child .frame-info-wrap { bottom: var(--pad); left: var(--pad);  }
+  .frame:last-child  .frame-info-wrap { bottom: var(--pad); right: var(--pad); }
 }
-/* Portrait: first frame top-left, second frame bottom-left */
 @media (orientation: portrait) {
-  .frame:first-child .frame-info-wrap { top: var(--pad);    bottom: auto; left: var(--pad); }
-  .frame:last-child  .frame-info-wrap { bottom: var(--pad); top: auto;    left: var(--pad); }
+  .frame:first-child .frame-info-wrap { top: var(--pad);    left: var(--pad); }
+  .frame:last-child  .frame-info-wrap { bottom: var(--pad); left: var(--pad); }
 }
 
-/* ─── Info text per frame ────────────────────────────────── */
+/* ─── Info text ──────────────────────────────────────────── */
 .frame-info {
+  text-align: left;
   line-height: 1.2;
   pointer-events: none;
-  text-align: left;
 }
 
 .frame-info p {
@@ -128,16 +118,16 @@ html, body {
   font-weight: 500;
   color: var(--white);
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
-  margin: 0 0 1px 0;    /* very tight vertical spacing */
+  margin: 0 0 1px 0;   /* tight vertical spacing */
   line-height: 1.2;
 }
 
-/* ─── Info close button (−) ──────────────────────────────── */
-/* Sits top-right of the info wrap */
+/* ─── − close button: top-right of its frame ─────────────── */
 .info-close-btn {
   position: absolute;
-  top: 0;
-  right: calc(-1 * var(--fs-info) - 6px);
+  top: var(--pad);
+  right: var(--pad);
+  z-index: 3;
   background: none;
   border: none;
   color: var(--white);
@@ -150,13 +140,13 @@ html, body {
   text-shadow: 0 1px 4px rgba(0,0,0,0.5);
   pointer-events: auto;
 }
-.info-close-btn:hover { opacity: 1; }
+.info-close-btn:hover  { opacity: 1; }
+.info-close-btn.hidden { display: none; }
 
-/* ─── Info toggle button (i) ─────────────────────────────── */
-/* Shown when info is hidden; sits at bottom-left of the frame */
+/* ─── i toggle button: bottom-left of its frame ─────────── */
 .info-toggle-btn {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   background: none;
   border: none;
   color: var(--white);
@@ -170,7 +160,7 @@ html, body {
   text-shadow: 0 1px 4px rgba(0,0,0,0.5);
   pointer-events: auto;
 }
-.info-toggle-btn:hover { opacity: 1; }
+.info-toggle-btn:hover  { opacity: 1; }
 .info-toggle-btn.hidden { display: none; }
 
 @media (orientation: landscape) {
