@@ -12,15 +12,12 @@ let infoVisible  = true;    // global: whether frame-info is shown
 
 export function setArchiveOpen(val) { archiveOpen = val; }
 
-// Called from index.html hide-btn to sync global flag + DOM
+// Sets info visibility globally — updates all existing DOM elements + flag for new frames
 export function setInfoVisible(val) {
   infoVisible = val;
-  document.querySelectorAll('.frame-info-wrap').forEach(w => {
-    w.classList.toggle('hidden', !val);
-  });
-  document.querySelectorAll('.info-toggle-btn').forEach(b => {
-    b.classList.toggle('hidden', val);
-  });
+  document.querySelectorAll('.frame-info-wrap').forEach(w => w.classList.toggle('hidden', !val));
+  document.querySelectorAll('.info-close-btn').forEach(b => b.classList.toggle('hidden', !val));
+  document.querySelectorAll('.info-toggle-btn').forEach(b => b.classList.toggle('hidden',  val));
 }
 
 const stack = document.getElementById('collage-stack');
@@ -69,27 +66,27 @@ function buildFrame(image) {
     `transform-origin: center center`,
   ].join('; ');
 
-  // ── Info wrapper: left-aligned, visibility follows global flag ─────────
+  // ── Info wrap: positioned at original corners via CSS ─────────────────
   const infoWrap = document.createElement('div');
   infoWrap.className = 'frame-info-wrap' + (infoVisible ? '' : ' hidden');
 
   const info = document.createElement('div');
   info.className = 'frame-info';
   info.innerHTML = buildInfoHTML(image);
+  infoWrap.appendChild(info);
 
-  // − button: top-right of wrap, hides info globally
+  // − button: top-right of its frame (position: absolute via CSS)
+  // hidden when info is hidden
   const closeBtn = document.createElement('button');
-  closeBtn.className = 'info-close-btn';
+  closeBtn.className = 'info-close-btn' + (infoVisible ? '' : ' hidden');
   closeBtn.textContent = '−';
   closeBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     setInfoVisible(false);
   });
 
-  infoWrap.appendChild(info);
-  infoWrap.appendChild(closeBtn);
-
-  // i button: left side of frame, shown only when info is hidden
+  // i toggle: bottom-left of its frame (position: absolute via CSS)
+  // hidden when info is visible
   const toggleBtn = document.createElement('button');
   toggleBtn.className = 'info-toggle-btn' + (infoVisible ? ' hidden' : '');
   toggleBtn.textContent = 'i';
@@ -100,6 +97,7 @@ function buildFrame(image) {
 
   frame.appendChild(img);
   frame.appendChild(infoWrap);
+  frame.appendChild(closeBtn);
   frame.appendChild(toggleBtn);
   return frame;
 }
@@ -165,7 +163,7 @@ function preloadCollage(idx) {
 function advanceCollage() {
   if (busy || allImages.length === 0 || archiveOpen) return;
   busy       = true;
-  wheelAccum = 0;  // hard reset — no queuing
+  wheelAccum = 0;
 
   const current = stack.querySelector(`[data-col-idx="${collageIndex}"]`);
   if (current) {
@@ -190,7 +188,7 @@ function advanceCollage() {
 
   setTimeout(() => {
     busy       = false;
-    wheelAccum = 0;  // discard anything accumulated during animation
+    wheelAccum = 0;
   }, 800);
 }
 
@@ -206,7 +204,6 @@ function attachScrollListeners() {
   ].join(';');
   document.body.appendChild(catcher);
 
-  // Wheel: if busy or archive open, drop everything — no advance queuing
   catcher.addEventListener('wheel', (e) => {
     if (archiveOpen || busy) { wheelAccum = 0; return; }
     if (e.deltaY <= 0) { wheelAccum = 0; return; }
@@ -227,7 +224,6 @@ function attachScrollListeners() {
     if (delta > 60) advanceCollage();
   }, { passive: true });
 
-  // Space / ArrowDown — blocked when archive open
   window.addEventListener('keydown', (e) => {
     if (archiveOpen) return;
     if (e.key === 'ArrowDown' || e.key === ' ') {
