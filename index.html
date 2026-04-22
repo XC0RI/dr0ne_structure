@@ -91,10 +91,8 @@
     import { openUploadModal, openEditModal }               from '/src/upload-ui.js';
     import { isLoggedIn, login }                           from '/src/auth.js';
 
-    // ── Build archive table header ─────────────────────────────────────
     renderTableHeader();
 
-    // ── Fetch images from D1 ───────────────────────────────────────────
     let images = [];
     async function loadImages() {
       try {
@@ -117,7 +115,6 @@
     window.__openUploadModal = openUploadModal;
     window.__openEditModal   = openEditModal;
 
-    // ── Init ───────────────────────────────────────────────────────────
     await loadImages();
     initCollage(images);
 
@@ -151,13 +148,9 @@
     });
 
     droneLabel.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        droneLabel.click();
-      }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); droneLabel.click(); }
     });
 
-    // Escape key closes archive
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && archiveOverlay.classList.contains('open')) {
         closeArchive();
@@ -169,7 +162,7 @@
       }
     });
 
-    // ── Login flow ─────────────────────────────────────────────────────
+    // ── Login ──────────────────────────────────────────────────────────
     droneLabel.addEventListener('click', (e) => {
       if (e.shiftKey && !isLoggedIn() && archiveOverlay.classList.contains('open')) {
         showLoginModal();
@@ -182,7 +175,6 @@
       lo.style.display = 'flex';
       document.getElementById('login-password').focus();
     }
-
     function hideLoginModal() {
       const lo = document.getElementById('login-overlay');
       lo.classList.add('hidden');
@@ -211,17 +203,16 @@
     document.getElementById('login-cancel').addEventListener('click', hideLoginModal);
 
     // ── Hide/show texts ────────────────────────────────────────────────
-    // Hides frame-info (via setInfoVisible), screenshot-btn, info-btn
     const hideBtn   = document.getElementById('hide-btn');
     let textsHidden = false;
 
     hideBtn.addEventListener('click', () => {
       textsHidden = !textsHidden;
 
-      // Sync frame-info visibility with global flag in collage.js
+      // Sync all frame-info via collage module's global flag
       setInfoVisible(!textsHidden);
 
-      // Also hide/show screenshot and info buttons
+      // Also dim screenshot and info buttons
       const screenshotBtn = document.getElementById('screenshot-btn');
       const infoBtn3      = document.getElementById('info-btn');
       if (screenshotBtn) screenshotBtn.style.opacity = textsHidden ? '0' : '';
@@ -260,8 +251,7 @@
       const flash = document.getElementById('screenshot-flash');
 
       btn.style.visibility = 'hidden';
-
-      flash.style.cssText = 'position:fixed;inset:0;z-index:500;background:#fff;display:block;';
+      flash.style.cssText  = 'position:fixed;inset:0;z-index:500;background:#fff;display:block;';
 
       try {
         const dpr = window.devicePixelRatio || 1;
@@ -309,7 +299,7 @@
           ctx.drawImage(img, -dispW / 2, -dispH / 2, dispW, dispH);
           ctx.restore();
 
-          // Draw frame-info text — all left-aligned now
+          // Draw frame-info text — respects hidden state, preserves left/right alignment
           const infoWrap = frame.querySelector('.frame-info-wrap');
           if (infoWrap && !infoWrap.classList.contains('hidden')) {
             const info = infoWrap.querySelector('.frame-info');
@@ -317,6 +307,10 @@
               const ps = Array.from(info.querySelectorAll('p'));
               if (ps.length > 0) {
                 const fsinfo = Math.min(Math.max(vw * 0.06, 24), 38) / 4;
+                // Determine alignment from wrap position
+                const wrapRect     = infoWrap.getBoundingClientRect();
+                const isRightSide  = wrapRect.left + wrapRect.width / 2 > vw / 2;
+
                 ctx.save();
                 ctx.beginPath();
                 ctx.rect(rect.left, rect.top, fw, fh);
@@ -329,6 +323,7 @@
                 ctx.shadowOffsetY = 1;
                 ctx.textBaseline  = 'hanging';
                 ctx.textAlign     = 'left';
+
                 for (const p of ps) {
                   const pr = p.getBoundingClientRect();
                   ctx.fillText(p.textContent.trim(), pr.left, pr.top);
@@ -366,14 +361,11 @@
         ctx.fillStyle   = 'rgba(255,255,255,0.11)';
         ctx.textBaseline = 'middle';
         const wmText    = 'https://dr0ne.world ';
-        const wmMetrics = ctx.measureText(wmText);
-        const tw        = wmMetrics.width;
+        const tw        = ctx.measureText(wmText).width;
         const th        = wmSize * 2.5;
-        const cw        = vw;
-        const ch        = vh;
-        ctx.translate(cw / 2, ch / 2);
+        ctx.translate(vw / 2, vh / 2);
         ctx.rotate(-35 * Math.PI / 180);
-        const diag = Math.sqrt(cw * cw + ch * ch);
+        const diag = Math.sqrt(vw * vw + vh * vh);
         const cols = Math.ceil(diag / tw) + 2;
         const rows = Math.ceil(diag / th) + 2;
         for (let row = -rows; row <= rows; row++) {
@@ -385,19 +377,17 @@
 
         const dataUrl = canvas.toDataURL('image/png');
 
-        const img = document.createElement('img');
-        img.src = dataUrl;
-        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0;';
-        flash.insertBefore(img, flash.firstChild);
+        const imgEl = document.createElement('img');
+        imgEl.src = dataUrl;
+        imgEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0;';
+        flash.insertBefore(imgEl, flash.firstChild);
 
         const whiteOverlay = document.createElement('div');
         whiteOverlay.style.cssText = 'position:absolute;inset:0;background:#fff;transition:opacity 1.3s ease;z-index:1;';
         flash.appendChild(whiteOverlay);
 
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            whiteOverlay.style.opacity = '0';
-          });
+          requestAnimationFrame(() => { whiteOverlay.style.opacity = '0'; });
         });
 
         setTimeout(() => {
