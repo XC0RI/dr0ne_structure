@@ -122,9 +122,11 @@ html, body {
   line-height: 1.2;
 }
 
-/* ─── − close button: bottom-left of its frame ──────────── */
+/* ─── − close button: top-RIGHT of its frame ────────────── */
 .info-close-btn {
   position: absolute;
+  top: var(--pad);
+  right: var(--pad);
   z-index: 3;
   background: none;
   border: none;
@@ -141,26 +143,16 @@ html, body {
 .info-close-btn:hover  { opacity: 1; }
 .info-close-btn.hidden { display: none; }
 
-@media (orientation: landscape) {
-  .frame:first-child .info-close-btn,
-  .frame:last-child  .info-close-btn { bottom: var(--pad); left: var(--pad); }
-}
-@media (orientation: portrait) {
-  .frame:first-child .info-close-btn { top: var(--pad);    left: var(--pad); }
-  .frame:last-child  .info-close-btn { bottom: var(--pad); left: var(--pad); }
-}
-
-/* ─── i toggle button: top-right of its frame ───────────── */
+/* ─── i toggle button: top-LEFT of its frame ────────────── */
 .info-toggle-btn {
   position: absolute;
   top: var(--pad);
-  right: var(--pad);
+  left: var(--pad);
   z-index: 3;
   background: none;
   border: none;
   color: var(--white);
   font-family: var(--font-main);
-  font-style: italic;
   font-size: var(--fs-info);
   line-height: 1;
   cursor: pointer;
