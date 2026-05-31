@@ -178,7 +178,20 @@ function renderTable() {
 
       } else {
         const val = getCellValue(img, col.key);
-        td.textContent = val;
+
+        // Multi-line columns clamp inside an inner wrapper; others are plain text
+        const multiline = col.key === 'title' || col.key === 'txt' || col.key === 'made_by2';
+        let measureEl = td;
+        if (multiline) {
+          const clamp = document.createElement('div');
+          clamp.className = 'clamp';
+          clamp.textContent = val;
+          td.appendChild(clamp);
+          measureEl = clamp;
+        } else {
+          td.textContent = val;
+        }
+
         if (col.filterable) {
           td.addEventListener('click', () => setFilter(col.key, val));
         }
@@ -186,8 +199,8 @@ function renderTable() {
         // (5-line clamp on title/txt/made_by2, or single-line ellipsis elsewhere)
         td.addEventListener('mouseenter', () => {
           const clipped =
-            td.scrollHeight - td.clientHeight > 1 ||
-            td.scrollWidth  - td.clientWidth  > 1;
+            measureEl.scrollHeight - measureEl.clientHeight > 1 ||
+            measureEl.scrollWidth  - measureEl.clientWidth  > 1;
           if (clipped) showTextTooltip(val, td);
         });
         td.addEventListener('mouseleave', hideTextTooltip);
