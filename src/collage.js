@@ -88,8 +88,15 @@ function buildFrame(image) {
   frame.appendChild(img);
   frame.appendChild(infoWrap);
 
-  // Truncate info lines to half the frame width once layout is available
-  requestAnimationFrame(() => truncateFrame(frame));
+  // Truncate info lines once the frame has a measurable width.
+  // Frames may be appended off-screen (translateY) and not laid out for a tick,
+  // so retry across a few frames until clientWidth is available.
+  let tries = 0;
+  const tryTruncate = () => {
+    if (frame.clientWidth > 0) { truncateFrame(frame); return; }
+    if (tries++ < 30) requestAnimationFrame(tryTruncate);
+  };
+  requestAnimationFrame(tryTruncate);
 
   return frame;
 }
@@ -97,18 +104,17 @@ function buildFrame(image) {
 function buildInfoLines(img) {
   const lines = [];
   const add = (val) => {
-    if (val && val !== '-') lines.push(val);
+    // Show every category, including ones whose value is '-'
+    lines.push((val === undefined || val === null || val === '') ? '-' : val);
   };
 
   add(img.date);
 
   if (img.made_by === 'Dr0ne') {
     add('Dr0ne');
-  } else if (img.made_by !== '-' || img.made_by2 !== '-') {
-    const display = img.made_by !== '-'
-      ? `${img.made_by} / ${img.made_by2}`
-      : img.made_by2;
-    if (display) lines.push(display);
+  } else {
+    // Combine the two author fields; keep '-' visible instead of dropping it
+    add(`${img.made_by ?? '-'} / ${img.made_by2 ?? '-'}`);
   }
 
   add(img.type);
@@ -121,21 +127,46 @@ function buildInfoLines(img) {
 
 // ─── Info truncation (no line breaks, max half the image width, "…") ─────────
 
+// Hidden span used to measure natural text width independent of layout/clipping
+let measureEl = null;
+function getMeasurer(refEl) {
+  if (!measureEl) {
+    measureEl = document.createElement('span');
+    measureEl.style.cssText =
+      'position:absolute;left:-99999px;top:-99999px;visibility:hidden;' +
+      'white-space:nowrap;pointer-events:none;';
+    document.body.appendChild(measureEl);
+  }
+  const cs = getComputedStyle(refEl);
+  measureEl.style.font          = cs.font;
+  measureEl.style.fontFamily    = cs.fontFamily;
+  measureEl.style.fontSize      = cs.fontSize;
+  measureEl.style.fontWeight    = cs.fontWeight;
+  measureEl.style.letterSpacing = cs.letterSpacing;
+  return measureEl;
+}
+
+function textWidth(refEl, text) {
+  const m = getMeasurer(refEl);
+  m.textContent = text;
+  return m.getBoundingClientRect().width;
+}
+
 function truncateLine(p, maxPx) {
   const full = p.dataset.full ?? p.textContent;
   p.textContent = full;
   p.classList.remove('truncated');
 
-  // Not measurable (e.g. info hidden) or already fits → leave as-is
-  if (maxPx <= 0 || p.scrollWidth <= maxPx) return;
+  if (maxPx <= 0) return;                       // not measurable yet
+  if (textWidth(p, full) <= maxPx) return;      // fits in full → no ellipsis
 
-  // Binary search for the longest prefix that fits with an ellipsis
+  // Binary search for the longest prefix that still fits once "…" is appended
   let lo = 0;
   let hi = full.length;
   while (lo < hi) {
     const mid = Math.ceil((lo + hi) / 2);
-    p.textContent = full.slice(0, mid).trimEnd() + '…';
-    if (p.scrollWidth <= maxPx) lo = mid; else hi = mid - 1;
+    if (textWidth(p, full.slice(0, mid).trimEnd() + '…') <= maxPx) lo = mid;
+    else hi = mid - 1;
   }
   p.textContent = (full.slice(0, lo).trimEnd() || full.slice(0, 1)) + '…';
   p.classList.add('truncated');
@@ -143,6 +174,7 @@ function truncateLine(p, maxPx) {
 
 function truncateFrame(frame) {
   const maxPx = frame.clientWidth * 0.5;
+  if (maxPx <= 0) return;   // frame not laid out yet; will retry via rAF/resize
   frame.querySelectorAll('.frame-info p').forEach(p => truncateLine(p, maxPx));
 }
 
