@@ -212,11 +212,11 @@
       // Sync all frame-info via collage module's global flag
       setInfoVisible(!textsHidden);
 
-      // Also dim screenshot and info buttons
-      const screenshotBtn = document.getElementById('screenshot-btn');
-      const infoBtn3      = document.getElementById('info-btn');
-      if (screenshotBtn) screenshotBtn.style.opacity = textsHidden ? '0' : '';
-      if (infoBtn3)      infoBtn3.style.opacity      = textsHidden ? '0' : '';
+      // Keep the screenshot button visible even when texts are hidden,
+      // so a clean screenshot (without frame info) can still be taken.
+      // Only the info-panel button is dimmed alongside the texts.
+      const infoBtn3 = document.getElementById('info-btn');
+      if (infoBtn3) infoBtn3.style.opacity = textsHidden ? '0' : '';
 
       // Switch − to + and back
       const svg = hideBtn.querySelector('svg');
@@ -354,23 +354,25 @@
         ctx.fillText('DR0NE', dlR.left, dlR.top);
         ctx.restore();
 
-        // Watermark
+        // Watermark — sparse diagonal pattern, widely spaced
         ctx.save();
         const wmSize    = Math.round(Math.min(Math.max(vw * 0.06, 24), 38) / 2);
         ctx.font        = `500 ${wmSize}px GeistDr0ne, sans-serif`;
         ctx.fillStyle   = 'rgba(255,255,255,0.11)';
         ctx.textBaseline = 'middle';
-        const wmText    = 'https://dr0ne.world ';
-        const tw        = ctx.measureText(wmText).width;
-        const th        = wmSize * 2.5;
+        const wmText    = 'https://dr0ne.world';
+        const textW     = ctx.measureText(wmText).width;
+        const stepX     = textW * 3.0;     // extra gap between repeats within a row
+        const stepY     = wmSize * 9;      // larger gap between rows
         ctx.translate(vw / 2, vh / 2);
         ctx.rotate(-35 * Math.PI / 180);
         const diag = Math.sqrt(vw * vw + vh * vh);
-        const cols = Math.ceil(diag / tw) + 2;
-        const rows = Math.ceil(diag / th) + 2;
+        const cols = Math.ceil(diag / stepX) + 2;
+        const rows = Math.ceil(diag / stepY) + 2;
         for (let row = -rows; row <= rows; row++) {
+          const offsetX = (row % 2) * (stepX / 2);   // stagger alternate rows
           for (let col = -cols; col <= cols; col++) {
-            ctx.fillText(wmText, col * tw, row * th);
+            ctx.fillText(wmText, col * stepX + offsetX, row * stepY);
           }
         }
         ctx.restore();
@@ -401,15 +403,42 @@
           }, 400);
         }, 2000);
 
-        // Download — filename: DR0NE 2026-03-25 at 15.09.41
-        const a    = document.createElement('a');
-        a.href     = dataUrl;
+        // Filename: DR0NE 2026-03-25 at 15.09.41.png
         const now  = new Date();
         const pad2 = n => String(n).padStart(2, '0');
         const datePart = `${now.getFullYear()}-${pad2(now.getMonth()+1)}-${pad2(now.getDate())}`;
         const timePart = `${pad2(now.getHours())}.${pad2(now.getMinutes())}.${pad2(now.getSeconds())}`;
-        a.download = `DR0NE ${datePart} at ${timePart}.png`;
-        a.click();
+        const filename = `DR0NE ${datePart} at ${timePart}.png`;
+
+        // On phones, offer the native share sheet so the user can pick
+        // "Save to Photos" (lands in the Photos/Gallery app instead of Files).
+        // On desktop (or where file-sharing is unsupported), download directly.
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+                         (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent)); // iPadOS
+        let shared = false;
+
+        if (isMobile && navigator.canShare) {
+          try {
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+            if (blob) {
+              const file = new File([blob], filename, { type: 'image/png' });
+              if (navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: '' });
+                shared = true;
+              }
+            }
+          } catch (err) {
+            // User cancelled the sheet, or sharing failed → fall back to download
+            shared = false;
+          }
+        }
+
+        if (!shared) {
+          const a    = document.createElement('a');
+          a.href     = dataUrl;
+          a.download = filename;
+          a.click();
+        }
 
       } finally {
         btn.style.visibility = '';
