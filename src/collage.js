@@ -1,6 +1,8 @@
 // src/collage.js
 // Manages the collage: infinite forward-only scroll through random image pairs
 
+import { showTextTooltip, hideTextTooltip } from './tooltip.js';
+
 const PRELOAD_COUNT = 4;
 
 let allImages    = [];
@@ -18,6 +20,7 @@ export function setInfoVisible(val) {
   document.querySelectorAll('.frame-info-wrap').forEach(w => w.classList.toggle('hidden', !val));
   document.querySelectorAll('.info-close-btn').forEach(b => b.classList.toggle('hidden', !val));
   document.querySelectorAll('.info-toggle-btn').forEach(b => b.classList.toggle('hidden',  val));
+  if (val) requestAnimationFrame(retruncateAll);   // lines weren't measurable while hidden
 }
 
 const stack = document.getElementById('collage-stack');
@@ -72,7 +75,16 @@ function buildFrame(image) {
 
   const info = document.createElement('div');
   info.className = 'frame-info';
-  info.innerHTML = buildInfoHTML(image);
+  buildInfoLines(image).forEach(text => {
+    const p = document.createElement('p');
+    p.textContent   = text;     // full text initially; truncated after layout
+    p.dataset.full  = text;
+    p.addEventListener('mouseenter', () => {
+      if (p.classList.contains('truncated')) showTextTooltip(p.dataset.full, p);
+    });
+    p.addEventListener('mouseleave', hideTextTooltip);
+    info.appendChild(p);
+  });
   infoWrap.appendChild(info);
 
   // − button: top-right of its frame (position: absolute via CSS)
@@ -99,13 +111,17 @@ function buildFrame(image) {
   frame.appendChild(infoWrap);
   frame.appendChild(closeBtn);
   frame.appendChild(toggleBtn);
+
+  // Truncate info lines to half the frame width once layout is available
+  requestAnimationFrame(() => truncateFrame(frame));
+
   return frame;
 }
 
-function buildInfoHTML(img) {
+function buildInfoLines(img) {
   const lines = [];
   const add = (val) => {
-    if (val && val !== '-') lines.push(`<p>${escHTML(val)}</p>`);
+    if (val && val !== '-') lines.push(val);
   };
 
   add(img.date);
@@ -116,7 +132,7 @@ function buildInfoHTML(img) {
     const display = img.made_by !== '-'
       ? `${img.made_by} / ${img.made_by2}`
       : img.made_by2;
-    if (display) lines.push(`<p>${escHTML(display)}</p>`);
+    if (display) lines.push(display);
   }
 
   add(img.type);
@@ -124,11 +140,38 @@ function buildInfoHTML(img) {
   add(img.location);
   add(img.txt);
 
-  return lines.join('');
+  return lines;
 }
 
-function escHTML(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// ─── Info truncation (no line breaks, max half the image width, "…") ─────────
+
+function truncateLine(p, maxPx) {
+  const full = p.dataset.full ?? p.textContent;
+  p.textContent = full;
+  p.classList.remove('truncated');
+
+  // Not measurable (e.g. info hidden) or already fits → leave as-is
+  if (maxPx <= 0 || p.scrollWidth <= maxPx) return;
+
+  // Binary search for the longest prefix that fits with an ellipsis
+  let lo = 0;
+  let hi = full.length;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    p.textContent = full.slice(0, mid).trimEnd() + '…';
+    if (p.scrollWidth <= maxPx) lo = mid; else hi = mid - 1;
+  }
+  p.textContent = (full.slice(0, lo).trimEnd() || full.slice(0, 1)) + '…';
+  p.classList.add('truncated');
+}
+
+function truncateFrame(frame) {
+  const maxPx = frame.clientWidth * 0.5;
+  frame.querySelectorAll('.frame-info p').forEach(p => truncateLine(p, maxPx));
+}
+
+function retruncateAll() {
+  document.querySelectorAll('.collage .frame').forEach(truncateFrame);
 }
 
 // ─── Collage DOM management ──────────────────────────────────────────────────
@@ -164,6 +207,7 @@ function advanceCollage() {
   if (busy || allImages.length === 0 || archiveOpen) return;
   busy       = true;
   wheelAccum = 0;
+  hideTextTooltip();
 
   const current = stack.querySelector(`[data-col-idx="${collageIndex}"]`);
   if (current) {
@@ -197,14 +241,9 @@ function advanceCollage() {
 let touchStartY = 0;
 
 function attachScrollListeners() {
-  const catcher = document.createElement('div');
-  catcher.style.cssText = [
-    'position:fixed', 'inset:0', 'z-index:1',
-    'pointer-events:auto', 'touch-action:none'
-  ].join(';');
-  document.body.appendChild(catcher);
-
-  catcher.addEventListener('wheel', (e) => {
+  // Listeners live on window (not a fullscreen catcher) so that the collage
+  // info text can receive hover events while scrolling still works everywhere.
+  window.addEventListener('wheel', (e) => {
     if (archiveOpen || busy) { wheelAccum = 0; return; }
     if (e.deltaY <= 0) { wheelAccum = 0; return; }
     wheelAccum += e.deltaY;
@@ -214,11 +253,11 @@ function attachScrollListeners() {
     }
   }, { passive: true });
 
-  catcher.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
+  window.addEventListener('touchstart', (e) => {
+    if (e.touches[0]) touchStartY = e.touches[0].clientY;
   }, { passive: true });
 
-  catcher.addEventListener('touchend', (e) => {
+  window.addEventListener('touchend', (e) => {
     if (archiveOpen || busy) return;
     const delta = touchStartY - e.changedTouches[0].clientY;
     if (delta > 60) advanceCollage();
@@ -231,6 +270,19 @@ function attachScrollListeners() {
       advanceCollage();
     }
   });
+
+  // Re-truncate info lines when the available width changes
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    hideTextTooltip();
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(retruncateAll, 120);
+  });
+
+  // Re-measure once the custom font has loaded (metrics change vs. fallback)
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => requestAnimationFrame(retruncateAll));
+  }
 }
 
 // ─── Blur/unblur collage for archive overlay ─────────────────────────────────
