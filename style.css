@@ -471,6 +471,13 @@ html, body {
 .modal select option { background: #111; }
 .modal textarea { resize: vertical; min-height: 60px; }
 
+.upload-reminder {
+  font-size: var(--fs-info);
+  color: var(--white);
+  opacity: 0.6;
+  vertical-align: middle;
+}
+
 .modal-error {
   font-size: var(--fs-info);
   color: rgba(255, 100, 100, 0.9);
