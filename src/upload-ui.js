@@ -243,13 +243,15 @@ function closeModal() {
   modalOverlay.innerHTML = '';
 }
 
-// Convert image ≤ 1MB, max 2500px
-// - If already WebP and ≤ 1MB and ≤ 2500px: upload as-is
+// Convert image ≤ 1.8MB, max 2700px on the longest side
+// - If already WebP and ≤ 1.8MB and ≤ 2700px: upload as-is
 // - Chrome/Firefox: convert to WebP
 // - Safari: convert to JPEG (Safari canvas cannot compress WebP)
+// Quality ladder starts high (0.90) so the size budget is spent on
+// sharpness; canvas downscaling uses high-quality resampling.
 async function convertToWebP(file) {
   const MAX_PX = 2700;
-  const MAX_MB = 1.4 * 1024 * 1024;
+  const MAX_MB = 1.8 * 1024 * 1024;
 
   const ua = navigator.userAgent;
   const isSafari = ua.includes('Safari') && !ua.includes('Chrome') && !ua.includes('Chromium');
@@ -277,7 +279,7 @@ async function convertToWebP(file) {
   let width  = img.naturalWidth;
   let height = img.naturalHeight;
 
-  // Scale down to max 2500px on longest side
+  // Scale down to max 2700px on longest side
   if (width > MAX_PX || height > MAX_PX) {
     if (width >= height) {
       height = Math.round(height * MAX_PX / width);
@@ -292,12 +294,15 @@ async function convertToWebP(file) {
     const canvas = document.createElement('canvas');
     canvas.width  = w;
     canvas.height = h;
-    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, 0, 0, w, h);
     return new Promise(res => canvas.toBlob(res, format, quality));
   }
 
-  // Try quality steps until under 1MB
-  for (const q of [0.82, 0.70, 0.58, 0.46]) {
+  // Try quality steps, highest first, until under MAX_MB
+  for (const q of [0.90, 0.84, 0.78, 0.68, 0.56]) {
     const blob = await tryExport(width, height, q);
     if (blob.size <= MAX_MB) return blob;
   }
