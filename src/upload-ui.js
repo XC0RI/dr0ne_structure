@@ -61,6 +61,7 @@ function uploadModalHTML() {
 
       <button class="btn" id="upload-submit-btn">upload</button>
       <button class="btn" id="upload-cancel-btn" style="margin-left:8px">cancel</button>
+      <span class="upload-reminder" style="margin-left:8px">Correct browser for upload, Geronimo?</span>
     </div>
   `;
 }
