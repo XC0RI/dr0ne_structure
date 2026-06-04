@@ -193,7 +193,7 @@ function renderTable() {
         }
 
         if (col.filterable) {
-          td.addEventListener('click', () => setFilter(col.key, val));
+          td.addEventListener('click', () => toggleFilter(col.key, val));
         }
         // Show full text on hover when the cell is truncated
         // (5-line clamp on title/txt/made_by2, or single-line ellipsis elsewhere)
@@ -239,11 +239,20 @@ function renderTable() {
 function renderFilterBar() {
   filterBar.innerHTML = '';
 
+  // Shorten long filter values (e.g. txt) for display; the stored filter
+  // value in activeFilters stays intact, so filtering is unaffected.
+  const MAX_FILTER_LABEL = 40;
+  const shortenValue = (str) => {
+    const s = String(str);
+    return s.length > MAX_FILTER_LABEL ? s.slice(0, MAX_FILTER_LABEL).trimEnd() + '…' : s;
+  };
+
   Object.entries(activeFilters).forEach(([key, val]) => {
     const badge = document.createElement('span');
     badge.className   = 'filter-badge';
     const colLabel    = COLUMNS.find(c => c.key === key)?.label ?? key;
-    badge.textContent = `${colLabel}: ${val}  ×`;
+    badge.textContent = `${colLabel}: ${shortenValue(val)}  ×`;
+    badge.title       = `${colLabel}: ${val}`;
     badge.addEventListener('click', () => removeFilter(key));
     filterBar.appendChild(badge);
   });
@@ -295,6 +304,16 @@ function setFilter(key, value) {
   activeFilters[key] = value;
   renderTable();
   renderFilterBar();
+}
+
+// Click a cell whose value is already the active filter → remove it;
+// otherwise apply it. Mirrors the toggle behaviour of the category sort.
+function toggleFilter(key, value) {
+  if (activeFilters[key] === value) {
+    removeFilter(key);
+  } else {
+    setFilter(key, value);
+  }
 }
 
 function removeFilter(key) {
