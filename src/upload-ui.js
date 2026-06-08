@@ -28,6 +28,12 @@ function uploadModalHTML() {
       <label>date (YYYY)</label>
       <input type="text" id="f-date" maxlength="4" placeholder="—">
 
+      <label>project</label>
+      <select id="f-project">
+        <option value="-">—</option>
+        <option value="Project">Project</option>
+      </select>
+
       <label>made by</label>
       <select id="f-made-by">
         <option value="-">—</option>
@@ -106,6 +112,7 @@ function attachUploadHandlers() {
     const form = new FormData();
     form.append('image',     convertedBlob, 'image.webp');
     form.append('date',      document.getElementById('f-date').value.trim());
+    form.append('project',   document.getElementById('f-project').value);
     form.append('made_by',   document.getElementById('f-made-by').value);
     form.append('made_by2',  document.getElementById('f-made-by2').value.trim());
     form.append('type',      document.getElementById('f-type').value.trim());
@@ -157,6 +164,12 @@ function editModalHTML(img) {
       <label>date (YYYY)</label>
       <input type="text" id="e-date" maxlength="4" value="${v('date')}" placeholder="—">
 
+      <label>project</label>
+      <select id="e-project">
+        <option value="-"       ${sel('project','-')}>—</option>
+        <option value="Project" ${sel('project','Project')}>Project</option>
+      </select>
+
       <label>made by</label>
       <select id="e-made-by">
         <option value="-" ${sel('made_by','-')}>—</option>
@@ -206,6 +219,7 @@ function attachEditHandlers(id) {
 
     const body = {
       date:      document.getElementById('e-date').value.trim()      || '-',
+      project:   document.getElementById('e-project').value,
       made_by:   document.getElementById('e-made-by').value,
       made_by2:  document.getElementById('e-made-by2').value.trim()  || '-',
       type:      document.getElementById('e-type').value.trim()      || '-',

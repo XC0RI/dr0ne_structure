@@ -32,6 +32,7 @@ export async function onRequestPost(context) {
 
   const meta = {
     date:      get('date'),
+    project:   formData.get('project') === 'Project' ? 'Project' : '-',
     made_by:   get('made_by'),
     made_by2:  get('made_by2'),
     type:      get('type'),
@@ -50,11 +51,11 @@ export async function onRequestPost(context) {
     // 2. Store metadata in D1
     await env.DB.prepare(
       `INSERT INTO images
-        (id, uploaded_at, r2_key, date, made_by, made_by2, type, cover_pub, title, location, txt)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        (id, uploaded_at, r2_key, date, project, made_by, made_by2, type, cover_pub, title, location, txt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
       id, now, r2Key,
-      meta.date, meta.made_by, meta.made_by2, meta.type,
+      meta.date, meta.project, meta.made_by, meta.made_by2, meta.type,
       meta.cover_pub, meta.title, meta.location, meta.txt
     ).run();
 

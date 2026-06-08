@@ -10,7 +10,7 @@ export async function onRequestGet(context) {
     const { results } = await env.DB.prepare(
       `SELECT
         id, uploaded_at, r2_key,
-        date, made_by, made_by2, type, cover_pub,
+        date, project, made_by, made_by2, type, cover_pub,
         title, location, txt
        FROM images
        ORDER BY uploaded_at DESC`

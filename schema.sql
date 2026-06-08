@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS images (
   uploaded_at TEXT    NOT NULL,
   r2_key      TEXT    NOT NULL UNIQUE,
   date        TEXT    NOT NULL DEFAULT '-',
+  project     TEXT    NOT NULL DEFAULT '-',
   made_by     TEXT    NOT NULL DEFAULT '-',
   made_by2    TEXT    NOT NULL DEFAULT '-',
   type        TEXT    NOT NULL DEFAULT '-',
@@ -17,6 +18,7 @@ CREATE TABLE IF NOT EXISTS images (
 
 CREATE INDEX IF NOT EXISTS idx_uploaded_at ON images(uploaded_at DESC);
 CREATE INDEX IF NOT EXISTS idx_date        ON images(date);
+CREATE INDEX IF NOT EXISTS idx_project     ON images(project);
 CREATE INDEX IF NOT EXISTS idx_cover_pub   ON images(cover_pub);
 CREATE INDEX IF NOT EXISTS idx_made_by     ON images(made_by);
 CREATE INDEX IF NOT EXISTS idx_type        ON images(type);

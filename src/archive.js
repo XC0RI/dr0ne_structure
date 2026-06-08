@@ -52,6 +52,7 @@ const COLUMNS = [
   { key: 'thumb',     label: '0',         filterable: false, sortable: false },
   { key: 'position',  label: 'position',  filterable: false, sortable: false },
   { key: 'date',      label: 'date',      filterable: true,  sortable: true  },
+  { key: 'project',   label: 'project',   filterable: true,  sortable: true  },
   { key: 'made_by',   label: 'made by',   filterable: true,  sortable: true  },
   { key: 'made_by2',  label: 'made by2',  filterable: true,  sortable: true  },
   { key: 'type',      label: 'type',      filterable: true,  sortable: true  },
@@ -100,7 +101,7 @@ export function renderTableHeader() {
   if (existing) existing.remove();
 
   const colDefs = [
-    'col-thumb', 'col-position', 'col-date', 'col-made-by', 'col-made-by2',
+    'col-thumb', 'col-position', 'col-date', 'col-project', 'col-made-by', 'col-made-by2',
     'col-type', 'col-cover', 'col-title', 'col-location', 'col-txt', 'col-admin'
   ];
   const colgroup = document.createElement('colgroup');

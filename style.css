@@ -216,27 +216,32 @@ html, body {
 }
 
 /* ── Column widths ─────────────────────────────────────────── */
+/* project is proportionally as wide as date. Hide order (last visible
+   set is made by / made by2 / title): txt → location → cover → type
+   → project → date. */
 #archive-table col.col-position { width: 6%; }
 #archive-table col.col-date     { width: 6%; }
+#archive-table col.col-project  { width: 6%; }
 #archive-table col.col-made-by  { width: 9%; }
-#archive-table col.col-made-by2 { width: 11%; }
+#archive-table col.col-made-by2 { width: 10%; }
 #archive-table col.col-type     { width: 8%; }
 #archive-table col.col-cover    { width: 6%; }
-#archive-table col.col-title    { width: 20%; }
-#archive-table col.col-location { width: 9%; }
-#archive-table col.col-txt      { width: 25%; }
+#archive-table col.col-title    { width: 18%; }
+#archive-table col.col-location { width: 8%; }
+#archive-table col.col-txt      { width: 23%; }
 
 @media (max-width: 1449px) {
   #archive-table col.col-txt      { width: 0; }
   #archive-table td.txt, #archive-table th.txt { padding: 0; overflow: hidden; max-width: 0; }
   #archive-table col.col-position { width: 7%; }
   #archive-table col.col-date     { width: 7%; }
-  #archive-table col.col-made-by  { width: 11%; }
-  #archive-table col.col-made-by2 { width: 13%; }
+  #archive-table col.col-project  { width: 7%; }
+  #archive-table col.col-made-by  { width: 10%; }
+  #archive-table col.col-made-by2 { width: 12%; }
   #archive-table col.col-type     { width: 9%; }
   #archive-table col.col-cover    { width: 7%; }
-  #archive-table col.col-title    { width: 23%; }
-  #archive-table col.col-location { width: 23%; }
+  #archive-table col.col-title    { width: 21%; }
+  #archive-table col.col-location { width: 20%; }
 }
 
 @media (max-width: 1149px) {
@@ -246,11 +251,12 @@ html, body {
   #archive-table td.location, #archive-table th.location { padding: 0; overflow: hidden; max-width: 0; }
   #archive-table col.col-position { width: 8%; }
   #archive-table col.col-date     { width: 8%; }
-  #archive-table col.col-made-by  { width: 13%; }
-  #archive-table col.col-made-by2 { width: 15%; }
-  #archive-table col.col-type     { width: 11%; }
+  #archive-table col.col-project  { width: 8%; }
+  #archive-table col.col-made-by  { width: 12%; }
+  #archive-table col.col-made-by2 { width: 14%; }
+  #archive-table col.col-type     { width: 10%; }
   #archive-table col.col-cover    { width: 8%; }
-  #archive-table col.col-title    { width: 37%; }
+  #archive-table col.col-title    { width: 32%; }
 }
 
 @media (max-width: 949px) {
@@ -262,10 +268,11 @@ html, body {
   #archive-table td.cover_pub, #archive-table th.cover_pub { padding: 0; overflow: hidden; max-width: 0; }
   #archive-table col.col-position { width: 9%; }
   #archive-table col.col-date     { width: 9%; }
-  #archive-table col.col-made-by  { width: 15%; }
-  #archive-table col.col-made-by2 { width: 18%; }
-  #archive-table col.col-type     { width: 13%; }
-  #archive-table col.col-title    { width: 36%; }
+  #archive-table col.col-project  { width: 9%; }
+  #archive-table col.col-made-by  { width: 14%; }
+  #archive-table col.col-made-by2 { width: 16%; }
+  #archive-table col.col-type     { width: 12%; }
+  #archive-table col.col-title    { width: 31%; }
 }
 
 @media (max-width: 799px) {
@@ -279,9 +286,10 @@ html, body {
   #archive-table td.type,      #archive-table th.type      { padding: 0; overflow: hidden; max-width: 0; }
   #archive-table col.col-position { width: 10%; }
   #archive-table col.col-date     { width: 10%; }
-  #archive-table col.col-made-by  { width: 19%; }
-  #archive-table col.col-made-by2 { width: 22%; }
-  #archive-table col.col-title    { width: 39%; }
+  #archive-table col.col-project  { width: 10%; }
+  #archive-table col.col-made-by  { width: 17%; }
+  #archive-table col.col-made-by2 { width: 19%; }
+  #archive-table col.col-title    { width: 34%; }
 }
 
 @media (max-width: 699px) {
@@ -289,11 +297,31 @@ html, body {
   #archive-table col.col-location { width: 0; }
   #archive-table col.col-cover    { width: 0; }
   #archive-table col.col-type     { width: 0; }
+  #archive-table col.col-project  { width: 0; }
+  #archive-table td.txt,       #archive-table th.txt       { padding: 0; overflow: hidden; max-width: 0; }
+  #archive-table td.location,  #archive-table th.location  { padding: 0; overflow: hidden; max-width: 0; }
+  #archive-table td.cover_pub, #archive-table th.cover_pub { padding: 0; overflow: hidden; max-width: 0; }
+  #archive-table td.type,      #archive-table th.type      { padding: 0; overflow: hidden; max-width: 0; }
+  #archive-table td.project,   #archive-table th.project   { padding: 0; overflow: hidden; max-width: 0; }
+  #archive-table col.col-position { width: 11%; }
+  #archive-table col.col-date     { width: 11%; }
+  #archive-table col.col-made-by  { width: 22%; }
+  #archive-table col.col-made-by2 { width: 24%; }
+  #archive-table col.col-title    { width: 32%; }
+}
+
+@media (max-width: 599px) {
+  #archive-table col.col-txt      { width: 0; }
+  #archive-table col.col-location { width: 0; }
+  #archive-table col.col-cover    { width: 0; }
+  #archive-table col.col-type     { width: 0; }
+  #archive-table col.col-project  { width: 0; }
   #archive-table col.col-date     { width: 0; }
   #archive-table td.txt,       #archive-table th.txt       { padding: 0; overflow: hidden; max-width: 0; }
   #archive-table td.location,  #archive-table th.location  { padding: 0; overflow: hidden; max-width: 0; }
   #archive-table td.cover_pub, #archive-table th.cover_pub { padding: 0; overflow: hidden; max-width: 0; }
   #archive-table td.type,      #archive-table th.type      { padding: 0; overflow: hidden; max-width: 0; }
+  #archive-table td.project,   #archive-table th.project   { padding: 0; overflow: hidden; max-width: 0; }
   #archive-table td.date,      #archive-table th.date      { padding: 0; overflow: hidden; max-width: 0; }
   #archive-table col.col-position { width: 12%; }
   #archive-table col.col-made-by  { width: 25%; }

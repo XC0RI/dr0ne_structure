@@ -118,7 +118,7 @@ function buildInfoLines(img) {
   }
 
   add(img.type);
-  add(img.title);
+  add(img.project === 'Project' ? `Project / ${img.title ?? '-'}` : (img.title ?? '-'));
   add(img.location);
   add(img.txt);
 
