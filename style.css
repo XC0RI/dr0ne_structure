@@ -595,7 +595,7 @@ html, body {
 
 /* ─── Top corner buttons (hide + info) ──────────────────── */
 #hide-btn,
-#info-btn {
+#archive-btn {
   position: fixed;
   top: var(--pad);
   z-index: 100;
@@ -609,13 +609,13 @@ html, body {
   transition: opacity 0.15s;
 }
 #hide-btn:hover,
-#info-btn:hover { opacity: 1; }
+#archive-btn:hover { opacity: 1; }
 
 #hide-btn { left: var(--pad); }
-#info-btn  { right: var(--pad); }
+#archive-btn  { right: var(--pad); }
 
 #hide-btn svg,
-#info-btn svg {
+#archive-btn svg {
   width: calc(var(--fs-info) * 1.6);
   height: calc(var(--fs-info) * 1.6);
   display: block;
@@ -624,7 +624,7 @@ html, body {
 
 @media (orientation: portrait) {
   #hide-btn svg,
-  #info-btn svg {
+  #archive-btn svg {
     width: calc(var(--fs-info) * 2.3);
     height: calc(var(--fs-info) * 2.3);
   }
