@@ -690,14 +690,10 @@ html, body {
   }
 }
 
-/* ─── DR0NE frosted glass when info overlay open ─────────── */
+/* ─── DR0NE fades when info overlay open ─────────────────── */
+#drone-label {
+  transition: opacity 0.3s ease;
+}
 #drone-label.info-open {
-  color: rgba(255,255,255,0.15);
-  text-shadow: none;
-  backdrop-filter: blur(8px) saturate(180%);
-  -webkit-backdrop-filter: blur(8px) saturate(180%);
-  background: rgba(255,255,255,0.08);
-  border-radius: 4px;
-  padding: 2px 8px;
-  transition: color 0.3s ease, background 0.3s ease;
+  opacity: 0.12;
 }
