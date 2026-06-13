@@ -14,7 +14,7 @@
   <div id="collage-stack"></div>
 
   <!-- ── DR0NE — static centre label / archive toggle ────────────────── -->
-  <div id="drone-label" role="button" aria-label="Open archive" tabindex="0">
+  <div id="drone-label" role="button" aria-label="Info" tabindex="0">
     DR0NE
   </div>
 
@@ -30,11 +30,19 @@
   <button id="archive-btn" aria-label="Archiv">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
       <circle cx="12" cy="12" r="10"/>
-      <text x="12" y="16.5" text-anchor="middle" font-size="11" font-family="GeistDr0ne, sans-serif" fill="currentColor" stroke="none">A</text>
+      <text x="12" y="16.5" text-anchor="middle" font-size="11" font-family="GeistDr0ne,sans-serif" fill="currentColor" stroke="none">A</text>
     </svg>
   </button>
 
-
+  <!-- ── Info overlay (DR0NE click) ────────────────────────────────────── -->
+  <div id="info-overlay">
+    <div id="info-content">
+      <p>Dr0ne is a practice formed by Kian Matine and Flipsey Burwinkel in 2025, working across architecture, Kunst am Bau and set design. The work draws from a self-built universe of references across subcultures — driven by an interest in the sublime, violence, and absurdity.</p>
+      <p>Active across Switzerland, with experience from offices in Zurich and Munich.</p>
+      <p>Rendering and Visualization:<br>Gate Visual Studio<br><a href="https://gatevisuals.xyz" target="_blank" rel="noopener">gatevisuals.xyz</a></p>
+      <p class="info-copyright">© Dr0ne 2025</p>
+    </div>
+  </div>
 
   <!-- ── Screenshot button ───────────────────────────────────────────── -->
   <button id="screenshot-btn" aria-label="Screenshot">
@@ -49,16 +57,6 @@
 
   <!-- ── Screenshot flash overlay ─────────────────────────────────────── -->
   <div id="screenshot-flash"></div>
-
-  <!-- ── Info overlay (DR0NE click) ───────────────────────────────────── -->
-  <div id="info-overlay">
-    <div id="info-content">
-      <p>Dr0ne is a practice formed by Kian Matine and Philipp Burwinkel in 2025, working across architecture, Kunst am Bau and set design. The work draws from a self-built universe of references across subcultures — driven by an interest in the sublime, violence, and absurdity.</p>
-      <p>Active across Switzerland, with experience from offices in Zurich and Munich.</p>
-      <p>Rendering and Visualization:<br>Gate Visual Studio<br><a href="https://gatevisuals.xyz" target="_blank" rel="noopener">gatevisuals.xyz</a></p>
-      <p class="info-copyright">© Dr0ne 2025</p>
-    </div>
-  </div>
 
   <!-- ── Archive overlay ──────────────────────────────────────────────── -->
   <div id="archive-overlay" role="dialog" aria-label="Archive" aria-modal="true">
@@ -122,32 +120,38 @@
     await loadImages();
     initCollage(images);
 
-    // ── DR0NE click: toggle archive ────────────────────────────────────
+    // ── DR0NE click: toggle info overlay ──────────────────────────────
     const droneLabel     = document.getElementById('drone-label');
     const archiveOverlay = document.getElementById('archive-overlay');
+    const infoOverlay    = document.getElementById('info-overlay');
 
     droneLabel.addEventListener('click', () => {
+      if (archiveOverlay.classList.contains('open')) return;
+      infoOverlay.classList.toggle('open');
+    });
+
+    // ── Archive btn: toggle archive ─────────────────────────────────────
+    document.getElementById('archive-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
       const isOpen        = archiveOverlay.classList.contains('open');
       const screenshotBtn = document.getElementById('screenshot-btn');
       const hideBtn2      = document.getElementById('hide-btn');
-      const infoBtn2      = document.getElementById('info-btn');
+      const archBtn       = document.getElementById('archive-btn');
       if (isOpen) {
         closeArchive();
         unblurCollage();
         setArchiveOpen(false);
-        droneLabel.setAttribute('aria-label', 'Open archive');
         screenshotBtn.style.display = '';
         hideBtn2.style.display      = '';
-        infoBtn2.style.display      = '';
+        archBtn.style.display       = '';
       } else {
         openArchive(images);
         blurCollage();
         setArchiveOpen(true);
-        droneLabel.setAttribute('aria-label', 'Close archive');
         screenshotBtn.style.display = 'none';
         hideBtn2.style.display      = 'none';
-        infoBtn2.style.display      = 'none';
-        document.getElementById('info-panel').classList.remove('open');
+        archBtn.style.display       = 'none';
+        infoOverlay.classList.remove('open');
       }
     });
 
@@ -218,9 +222,9 @@
 
       // Keep the screenshot button visible even when texts are hidden,
       // so a clean screenshot (without frame info) can still be taken.
-      // Only the info-panel button is dimmed alongside the texts.
-      const archiveBtn3 = document.getElementById('archive-btn');
-      if (archiveBtn3) archiveBtn3.style.opacity = textsHidden ? '0' : '';
+      // Only the archive button is dimmed alongside the texts.
+      const archBtn3 = document.getElementById('archive-btn');
+      if (archBtn3) archBtn3.style.opacity = textsHidden ? '0' : '';
 
       // Switch − to + and back
       const svg = hideBtn.querySelector('svg');
@@ -230,7 +234,7 @@
         svg.innerHTML = `<circle cx="12" cy="12" r="10"/><line x1="7" y1="12" x2="17" y2="12"/>`;
       }
 
-      if (textsHidden) document.getElementById('info-panel').classList.remove('open');
+      if (textsHidden) infoOverlay.classList.remove('open');
     });
 
     // ── Close info overlay on outside click ───────────────────────────
