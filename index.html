@@ -13,8 +13,8 @@
   <!-- ── Collage backdrop ─────────────────────────────────────────────── -->
   <div id="collage-stack"></div>
 
-  <!-- ── DR0NE — static centre label / archive toggle ────────────────── -->
-  <div id="drone-label" role="button" aria-label="Info" tabindex="0">
+  <!-- ── DR0NE — static centre label (ghost: visible, never interactive) ── -->
+  <div id="drone-label" aria-hidden="true">
     DR0NE
   </div>
 
@@ -26,21 +26,34 @@
     </svg>
   </button>
 
-  <!-- ── Top-right info button ─────────────────────────────────────────── -->
+  <!-- ── Top-right archive button (graphical A ⇄ X) ─────────────────────── -->
   <button id="archive-btn" aria-label="Archiv">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
       <circle cx="12" cy="12" r="10"/>
-      <text x="12" y="16.5" text-anchor="middle" font-size="11" font-family="GeistDr0ne,sans-serif" fill="currentColor" stroke="none">A</text>
+      <line x1="8.5"  y1="17" x2="12"    y2="7"/>
+      <line x1="15.5" y1="17" x2="12"    y2="7"/>
+      <line x1="9.55" y1="14" x2="14.45" y2="14"/>
     </svg>
   </button>
 
-  <!-- ── Info overlay (DR0NE click) ────────────────────────────────────── -->
+  <!-- ── Info button (I ⇄ X) ────────────────────────────────────────────── -->
+  <button id="info-btn" aria-label="Info">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="7" x2="12" y2="17"/>
+    </svg>
+  </button>
+
+  <!-- ── Info overlay (info button) ────────────────────────────────────── -->
   <div id="info-overlay">
-    <div id="info-content">
-      <p>Dr0ne is a practice formed by Kian Matine and Philipp Burwinkel in 2025, working across architecture, Kunst am Bau and set design. The work draws from a self-built universe of references across subcultures — driven by an interest in the sublime, violence, and absurdity.</p>
+    <div id="info-top" class="info-block">
+      <p>Dr0ne is a practice formed by Kian Matine and Flipsey Burwinkel in 2025, working across architecture, Kunst am Bau and set design. The work draws from a self-built universe of references across subcultures — driven by an interest in the sublime, violence, and absurdity.</p>
       <p>Active across Switzerland, with experience from offices in Zurich and Munich.</p>
-      <p>Rendering and Visualization:<br>Gate Visual Studio<br><a href="https://gatevisuals.xyz" target="_blank" rel="noopener">gatevisuals.xyz</a></p>
       <p class="info-copyright">© Dr0ne 2025</p>
+    </div>
+    <div id="info-bottom" class="info-block">
+      <p>Rendering and Visualization: Gate Visual Studio<br><a href="https://gatevisuals.xyz" target="_blank" rel="noopener">gatevisuals.xyz</a></p>
+      <p>Magazin: 2026 Magazine<br><a href="https://2026-magazine.com" target="_blank" rel="noopener">2026-magazine.com</a></p>
     </div>
   </div>
 
@@ -120,68 +133,99 @@
     await loadImages();
     initCollage(images);
 
-    // ── DR0NE click: toggle info overlay ──────────────────────────────
-    const droneLabel     = document.getElementById('drone-label');
+    // ── Element references ─────────────────────────────────────────────
     const archiveOverlay = document.getElementById('archive-overlay');
     const infoOverlay    = document.getElementById('info-overlay');
+    const infoBtn        = document.getElementById('info-btn');
+    const archiveBtn     = document.getElementById('archive-btn');
+    const hideBtn        = document.getElementById('hide-btn');
+    const screenshotBtn  = document.getElementById('screenshot-btn');
 
-    droneLabel.addEventListener('click', () => {
-      if (archiveOverlay.classList.contains('open')) return;
-      infoOverlay.classList.toggle('open');
-      droneLabel.classList.toggle('info-open', infoOverlay.classList.contains('open'));
-    });
+    // ── Button glyphs (circle + strokes, matching the other icons) ─────
+    const GLYPH_I = `<circle cx="12" cy="12" r="10"/><line x1="12" y1="7" x2="12" y2="17"/>`;
+    const GLYPH_X = `<circle cx="12" cy="12" r="10"/><line x1="8" y1="8" x2="16" y2="16"/><line x1="16" y1="8" x2="8" y2="16"/>`;
+    const GLYPH_A = `<circle cx="12" cy="12" r="10"/><line x1="8.5" y1="17" x2="12" y2="7"/><line x1="15.5" y1="17" x2="12" y2="7"/><line x1="9.55" y1="14" x2="14.45" y2="14"/>`;
 
-    // ── Archive btn: toggle archive ─────────────────────────────────────
-    document.getElementById('archive-btn').addEventListener('click', (e) => {
+    const setGlyph = (btn, markup) => { const s = btn.querySelector('svg'); if (s) s.innerHTML = markup; };
+    const showBtns = (list, visible) => list.forEach(b => { if (b) b.style.display = visible ? '' : 'none'; });
+
+    let infoOpen    = false;
+    let textsHidden = false;
+
+    // ── Info overlay (I ⇄ X) ───────────────────────────────────────────
+    function openInfo() {
+      if (infoOpen) return;
+      if (archiveOverlay.classList.contains('open')) closeArchiveOverlay();
+      infoOpen = true;
+      infoOverlay.classList.add('open');
+      setGlyph(infoBtn, GLYPH_X);
+      infoBtn.setAttribute('aria-label', 'Close');
+      infoBtn.style.opacity = '';
+      showBtns([archiveBtn, hideBtn, screenshotBtn], false);
+      blurCollage();
+      setArchiveOpen(true);   // reuse the collage scroll-lock flag
+    }
+
+    function closeInfo() {
+      if (!infoOpen) return;
+      infoOpen = false;
+      infoOverlay.classList.remove('open');
+      setGlyph(infoBtn, GLYPH_I);
+      infoBtn.setAttribute('aria-label', 'Info');
+      infoBtn.style.opacity = textsHidden ? '0' : '';
+      showBtns([archiveBtn, hideBtn, screenshotBtn], true);
+      unblurCollage();
+      setArchiveOpen(false);
+    }
+
+    infoBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isOpen        = archiveOverlay.classList.contains('open');
-      const screenshotBtn = document.getElementById('screenshot-btn');
-      const hideBtn2      = document.getElementById('hide-btn');
-      const archBtn       = document.getElementById('archive-btn');
-      if (isOpen) {
-        closeArchive();
-        unblurCollage();
-        setArchiveOpen(false);
-        screenshotBtn.style.display = '';
-        hideBtn2.style.display      = '';
-      } else {
-        openArchive(images);
-        blurCollage();
-        setArchiveOpen(true);
-        screenshotBtn.style.display = 'none';
-        hideBtn2.style.display      = 'none';
-        infoOverlay.classList.remove('open');
-      }
+      infoOpen ? closeInfo() : openInfo();
     });
 
-    droneLabel.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); droneLabel.click(); }
+    // ── Archive overlay (A ⇄ X) ────────────────────────────────────────
+    function openArchiveOverlay() {
+      if (infoOpen) closeInfo();
+      openArchive(images);
+      blurCollage();
+      setArchiveOpen(true);
+      setGlyph(archiveBtn, GLYPH_X);
+      archiveBtn.setAttribute('aria-label', 'Close');
+      archiveBtn.style.opacity = '';
+      showBtns([infoBtn, hideBtn, screenshotBtn], false);
+    }
+
+    function closeArchiveOverlay() {
+      closeArchive();
+      unblurCollage();
+      setArchiveOpen(false);
+      setGlyph(archiveBtn, GLYPH_A);
+      archiveBtn.setAttribute('aria-label', 'Archiv');
+      archiveBtn.style.opacity = textsHidden ? '0' : '';
+      showBtns([infoBtn, hideBtn, screenshotBtn], true);
+    }
+
+    archiveBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      archiveOverlay.classList.contains('open') ? closeArchiveOverlay() : openArchiveOverlay();
     });
 
+    // ── Escape closes whichever overlay is open ────────────────────────
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && archiveOverlay.classList.contains('open')) {
-        closeArchive();
-        unblurCollage();
-        setArchiveOpen(false);
-        document.getElementById('screenshot-btn').style.display = '';
-        document.getElementById('hide-btn').style.display       = '';
-
-      }
+      if (e.key !== 'Escape') return;
+      if (archiveOverlay.classList.contains('open')) closeArchiveOverlay();
+      else if (infoOpen) closeInfo();
     });
 
-    // ── Login ──────────────────────────────────────────────────────────
-    droneLabel.addEventListener('click', (e) => {
-      if (e.shiftKey && !isLoggedIn() && archiveOverlay.classList.contains('open')) {
-        showLoginModal();
-      }
-    });
-
-    function showLoginModal() {
+    // ── Login — triggered by the archive "0" header cell (top-left) ────
+    window.__showLoginModal = () => {
+      if (isLoggedIn()) return;
       const lo = document.getElementById('login-overlay');
       lo.classList.remove('hidden');
       lo.style.display = 'flex';
       document.getElementById('login-password').focus();
-    }
+    };
+
     function hideLoginModal() {
       const lo = document.getElementById('login-overlay');
       lo.classList.add('hidden');
@@ -209,21 +253,17 @@
 
     document.getElementById('login-cancel').addEventListener('click', hideLoginModal);
 
-    // ── Hide/show texts ────────────────────────────────────────────────
-    const hideBtn   = document.getElementById('hide-btn');
-    let textsHidden = false;
-
+    // ── Hide / show collage texts (+ ⇄ −) ──────────────────────────────
     hideBtn.addEventListener('click', () => {
       textsHidden = !textsHidden;
 
       // Sync all frame-info via collage module's global flag
       setInfoVisible(!textsHidden);
 
-      // Keep the screenshot button visible even when texts are hidden,
-      // so a clean screenshot (without frame info) can still be taken.
-      // Only the archive button is dimmed alongside the texts.
-      const archBtn3 = document.getElementById('archive-btn');
-      if (archBtn3) archBtn3.style.opacity = textsHidden ? '0' : '';
+      // Dim the info + archive affordances alongside the texts, but keep the
+      // screenshot button visible so a clean (text-free) screenshot is possible.
+      infoBtn.style.opacity    = textsHidden ? '0' : '';
+      archiveBtn.style.opacity = textsHidden ? '0' : '';
 
       // Switch − to + and back
       const svg = hideBtn.querySelector('svg');
@@ -231,18 +271,6 @@
         svg.innerHTML = `<circle cx="12" cy="12" r="10"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="12" y1="7" x2="12" y2="17"/>`;
       } else {
         svg.innerHTML = `<circle cx="12" cy="12" r="10"/><line x1="7" y1="12" x2="17" y2="12"/>`;
-      }
-
-      if (textsHidden) infoOverlay.classList.remove('open');
-    });
-
-    // ── Close info overlay on outside click ───────────────────────────
-    document.addEventListener('click', (e) => {
-      if (infoOverlay.classList.contains('open') &&
-          !document.getElementById('info-content').contains(e.target) &&
-          !droneLabel.contains(e.target)) {
-        infoOverlay.classList.remove('open');
-        droneLabel.classList.remove('info-open');
       }
     });
   </script>
@@ -319,8 +347,8 @@
                 ctx.clip();
                 ctx.font          = `normal ${fsinfo}px GeistDr0ne, sans-serif`;
                 ctx.fillStyle     = '#ffffff';
-                ctx.shadowColor   = 'rgba(0,0,0,0.4)';
-                ctx.shadowBlur    = 8;
+                ctx.shadowColor   = 'rgba(0,0,0,0.75)';
+                ctx.shadowBlur    = 3;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 1;
                 ctx.textBaseline  = 'hanging';
