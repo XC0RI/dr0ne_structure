@@ -121,7 +121,7 @@ html, body {
   font-family: var(--font-main);
   font-weight: 500;
   color: var(--white);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.75), 0 1px 3px rgba(0, 0, 0, 0.6);
   margin: 0 0 1px 0;   /* tight vertical spacing */
   line-height: 1.2;
   white-space: nowrap;       /* no line breaks within a field */
@@ -141,7 +141,8 @@ html, body {
   font-size: var(--fs);
   color: var(--white);
   text-shadow: 0 1px 4px rgba(0,0,0,0.6), 0 2px 16px rgba(0,0,0,0.5);
-  cursor: pointer;
+  cursor: default;
+  pointer-events: none;        /* ghost: floats above everything, never blocks clicks */
   user-select: none;
   white-space: nowrap;
   letter-spacing: -0.01em;
@@ -575,7 +576,7 @@ html, body {
   width: calc(var(--fs-info) * 2.3);
   height: calc(var(--fs-info) * 2.3);
   display: block;
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.7)) drop-shadow(0 1px 4px rgba(0,0,0,0.55));
 }
 
 /* Screenshot flash overlay */
@@ -593,9 +594,10 @@ html, body {
   display: block;
 }
 
-/* ─── Top corner buttons (hide + info) ──────────────────── */
+/* ─── Corner circle buttons (info + hide + archive) ─────── */
 #hide-btn,
-#archive-btn {
+#archive-btn,
+#info-btn {
   position: fixed;
   top: var(--pad);
   z-index: 100;
@@ -609,37 +611,45 @@ html, body {
   transition: opacity 0.15s;
 }
 #hide-btn:hover,
-#archive-btn:hover { opacity: 1; }
+#archive-btn:hover,
+#info-btn:hover { opacity: 1; }
 
-#hide-btn { left: var(--pad); }
-#archive-btn  { right: var(--pad); }
+/* Landscape (default): info top-left · hide top-centre · archive top-right */
+#info-btn    { left: var(--pad); }
+#hide-btn    { left: 50%; transform: translateX(-50%); }
+#archive-btn { right: var(--pad); }
 
 #hide-btn svg,
-#archive-btn svg {
+#archive-btn svg,
+#info-btn svg {
   width: calc(var(--fs-info) * 1.6);
   height: calc(var(--fs-info) * 1.6);
   display: block;
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.6)) drop-shadow(0 2px 16px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.7)) drop-shadow(0 1px 4px rgba(0,0,0,0.55));
 }
 
 @media (orientation: portrait) {
   #hide-btn svg,
-  #archive-btn svg {
+  #archive-btn svg,
+  #info-btn svg {
     width: calc(var(--fs-info) * 2.3);
     height: calc(var(--fs-info) * 2.3);
   }
 }
 
-/* ─── Info overlay (DR0NE click) ────────────────────────────── */
+/* ─── Info overlay (info button) ─────────────────────────────── */
+/* The collage itself is blurred (via .collage-blurred, same as the archive);
+   text is laid out top-centre + bottom-centre so the DR0NE label stays free
+   in the middle. Closing is handled solely by the info button (I ⇄ X). */
 #info-overlay {
   position: fixed;
   inset: 0;
   z-index: 90;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(12px) brightness(0.85);
-  -webkit-backdrop-filter: blur(12px) brightness(0.85);
+  justify-content: space-between;
+  padding: clamp(56px, 13vh, 130px) var(--pad);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -648,32 +658,32 @@ html, body {
   opacity: 1;
   pointer-events: auto;
 }
-#info-content {
+.info-block {
   max-width: clamp(280px, 50vw, 600px);
-  padding: var(--pad);
   text-align: center;
 }
-#info-content p {
+.info-block p {
   font-size: var(--fs-info);
   font-family: var(--font-main);
   font-weight: 500;
   color: var(--white);
-  text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+  text-shadow: 0 0 3px rgba(0,0,0,0.65), 0 1px 6px rgba(0,0,0,0.55);
   line-height: 1.6;
   word-break: normal;
   overflow-wrap: break-word;
   margin-bottom: 1.4em;
 }
-#info-content p:last-child { margin-bottom: 0; }
-#info-content a {
+.info-block p:last-child { margin-bottom: 0; }
+.info-block a {
   color: var(--white);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-#info-content a:hover { opacity: 0.7; }
+.info-block a:hover { opacity: 0.7; }
 .info-copyright { opacity: 0.5; }
 
 /* ─── Mobile (portrait) button repositioning ────────────── */
+/* screenshot centre-left · archive top-right · hide centre-right · info bottom-right */
 @media (orientation: portrait) {
   #screenshot-btn {
     left: var(--pad);
@@ -685,15 +695,17 @@ html, body {
   #hide-btn {
     left: auto;
     right: var(--pad);
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+  #info-btn {
+    left: auto;
+    right: var(--pad);
     top: auto;
     bottom: var(--pad);
+    transform: none;
   }
 }
 
-/* ─── DR0NE fades when info overlay open ─────────────────── */
-#drone-label {
-  transition: opacity 0.3s ease;
-}
-#drone-label.info-open {
-  opacity: 0.12;
-}
+/* ─── DR0NE label stays fully visible (ghost) at all times ─── */
