@@ -126,6 +126,14 @@ export function renderTableHeader() {
         renderFilterBar();
       });
     }
+    // The "0" thumbnail-column header is the (discreet) admin login trigger.
+    if (col.key === 'thumb') {
+      th.addEventListener('click', () => {
+        if (!isLoggedIn() && typeof window.__showLoginModal === 'function') {
+          window.__showLoginModal();
+        }
+      });
+    }
     tr.appendChild(th);
   });
 
@@ -252,9 +260,15 @@ function renderFilterBar() {
     const badge = document.createElement('span');
     badge.className   = 'filter-badge';
     const colLabel    = COLUMNS.find(c => c.key === key)?.label ?? key;
+    const fullValue   = String(val).replace(/\s+/g, ' ').trim();   // paragraphs → spaces
     badge.textContent = `${colLabel}: ${shortenValue(val)}  ×`;
-    badge.title       = `${colLabel}: ${val}`;
     badge.addEventListener('click', () => removeFilter(key));
+    // Full value on hover via the shared dark tooltip (matches the archive
+    // table + collage tooltips), only when the label was actually shortened.
+    if (String(val).length > MAX_FILTER_LABEL) {
+      badge.addEventListener('mouseenter', () => showTextTooltip(fullValue, badge));
+      badge.addEventListener('mouseleave', hideTextTooltip);
+    }
     filterBar.appendChild(badge);
   });
 
