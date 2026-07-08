@@ -128,7 +128,10 @@ export function renderTableHeader() {
     }
     // The "0" thumbnail-column header is the (discreet) admin login trigger.
     if (col.key === 'thumb') {
-      th.addEventListener('click', () => {
+      th.style.cursor = 'pointer';
+      th.title = 'Login';
+      th.addEventListener('click', (e) => {
+        e.stopPropagation();
         if (!isLoggedIn() && typeof window.__showLoginModal === 'function') {
           window.__showLoginModal();
         }
