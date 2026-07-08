@@ -701,7 +701,7 @@ html, body {
 
 /* Contact — heading + stacked links styled exactly like the other links
    (white, underlined, dim on hover). No extra gap under the heading. */
-.info-contact { margin-top: 0em; }
+.info-contact { margin-top: 0.4em; }
 .info-contact-heading { margin-bottom: 0; }
 .info-contact a {
   display: block;
