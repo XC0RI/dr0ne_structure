@@ -161,6 +161,13 @@ function editModalHTML(img) {
     <div class="modal" id="edit-modal">
       <h2>edit</h2>
 
+      <div id="edit-preview-wrap" class="has-image">
+        <img id="edit-preview" alt="preview" src="/img/${img.r2_key}"/>
+      </div>
+
+      <label>replace image</label>
+      <input type="file" id="edit-file" accept="image/*">
+
       <label>date (YYYY)</label>
       <input type="text" id="e-date" maxlength="4" value="${v('date')}" placeholder="—">
 
@@ -208,32 +215,62 @@ function editModalHTML(img) {
 }
 
 function attachEditHandlers(id) {
-  const errorEl  = document.getElementById('edit-error');
-  const saveBtn  = document.getElementById('edit-save-btn');
+  const errorEl   = document.getElementById('edit-error');
+  const saveBtn   = document.getElementById('edit-save-btn');
   const cancelBtn = document.getElementById('edit-cancel-btn');
+
+  const fileInput   = document.getElementById('edit-file');
+  const preview     = document.getElementById('edit-preview');
+  const previewWrap = document.getElementById('edit-preview-wrap');
+
+  // Optional replacement image — runs through the exact same client-side
+  // compression as a fresh upload (convertToWebP) before being sent.
+  let convertedBlob = null;
+
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    errorEl.textContent = '';
+    saveBtn.textContent = 'converting…';
+    saveBtn.disabled = true;
+
+    try {
+      convertedBlob = await convertToWebP(file);
+      preview.src = URL.createObjectURL(convertedBlob);
+      previewWrap.classList.add('has-image');
+      saveBtn.textContent = 'save';
+      saveBtn.disabled = false;
+    } catch (err) {
+      convertedBlob = null;
+      errorEl.textContent = 'Image conversion failed.';
+      saveBtn.textContent = 'save';
+      saveBtn.disabled = false;
+    }
+  });
 
   saveBtn.addEventListener('click', async () => {
     errorEl.textContent = '';
     saveBtn.textContent = 'saving…';
     saveBtn.disabled = true;
 
-    const body = {
-      date:      document.getElementById('e-date').value.trim()      || '-',
-      project:   document.getElementById('e-project').value,
-      made_by:   document.getElementById('e-made-by').value,
-      made_by2:  document.getElementById('e-made-by2').value.trim()  || '-',
-      type:      document.getElementById('e-type').value.trim()      || '-',
-      cover_pub: document.getElementById('e-cover-pub').value,
-      title:     document.getElementById('e-title').value.trim()     || '-',
-      location:  document.getElementById('e-location').value.trim()  || '-',
-      txt:       document.getElementById('e-txt').value.trim()       || '-',
-    };
+    // Sent as multipart so an optional replacement image can ride along.
+    const form = new FormData();
+    form.append('date',      document.getElementById('e-date').value.trim()      || '-');
+    form.append('project',   document.getElementById('e-project').value);
+    form.append('made_by',   document.getElementById('e-made-by').value);
+    form.append('made_by2',  document.getElementById('e-made-by2').value.trim()  || '-');
+    form.append('type',      document.getElementById('e-type').value.trim()      || '-');
+    form.append('cover_pub', document.getElementById('e-cover-pub').value);
+    form.append('title',     document.getElementById('e-title').value.trim()     || '-');
+    form.append('location',  document.getElementById('e-location').value.trim()  || '-');
+    form.append('txt',       document.getElementById('e-txt').value.trim()       || '-');
+    if (convertedBlob) form.append('image', convertedBlob, 'image.webp');
 
     try {
       const res = await fetch(`/api/edit/${id}`, {
         method: 'PUT',
-        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        headers: authHeaders(),   // Authorization only — browser sets the multipart boundary
+        body: form
       });
       if (!res.ok) {
         const { error } = await res.json().catch(() => ({}));
