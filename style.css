@@ -682,7 +682,7 @@ html, body {
   font-family: var(--font-main);
   font-weight: 500;
   color: var(--white);
-  text-shadow: 0 0 3px rgba(0,0,0,0.65), 0 1px 6px rgba(0,0,0,0.55);
+  text-shadow: none;              /* flat, like the archive text */
   line-height: 1.6;
   word-break: normal;
   overflow-wrap: break-word;
@@ -710,12 +710,17 @@ html, body {
 }
 
 /* Copyright / privacy — fine print (same size as the rest, just dimmed).
-   The extra margin-top lifts the two credit blocks one line clear of it. */
+   The extra margin-top lifts the two credit blocks one line clear of it.
+   This paragraph is the exception to the flat archive-style text — it keeps
+   its soft shadow (higher specificity to win over .info-block p). */
 .info-copyright {
   font-size: var(--fs-info);
   opacity: 0.45;
   line-height: 1.5;
   margin-top: 2.9em;
+}
+.info-block p.info-copyright {
+  text-shadow: 0 0 3px rgba(0,0,0,0.65), 0 1px 6px rgba(0,0,0,0.55);
 }
 .info-copyright a {
   text-decoration: underline;
