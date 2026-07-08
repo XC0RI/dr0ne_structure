@@ -121,11 +121,14 @@ html, body {
   font-family: var(--font-main);
   font-weight: 500;
   color: var(--white);
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.75), 0 1px 3px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);   /* soft, subtle — not clipped */
   margin: 0 0 1px 0;   /* tight vertical spacing */
   line-height: 1.2;
   white-space: nowrap;       /* no line breaks within a field */
-  overflow: hidden;          /* clip at the wrap edge (≤ half image) */
+  /* No overflow:hidden here — text is already truncated to ≤ half the image
+     in JS (truncateLine), and clipping the box also clipped the soft shadow,
+     leaving the boxy cut-off edges. The .frame wrapper still clips at the
+     image boundary, so nothing escapes the collage. */
   max-width: 100%;
   pointer-events: auto;      /* allow hover to reveal full text */
 }
@@ -411,6 +414,15 @@ html, body {
   display: block;
 }
 
+/* "0" header cell doubles as the discreet admin-login trigger.
+   Give it a clear hit area + affordance so it's reliably clickable. */
+#archive-table th.thumb {
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.15s;
+}
+#archive-table th.thumb:hover { opacity: 0.65; }
+
 /* ─── Filter bar ─────────────────────────────────────────── */
 #filter-bar {
   display: flex;
@@ -680,7 +692,33 @@ html, body {
   text-underline-offset: 2px;
 }
 .info-block a:hover { opacity: 0.7; }
-.info-copyright { opacity: 0.5; }
+
+/* Credits — label on its own line, name below as the (linked) second line */
+.info-credit { margin-bottom: 1.4em; }
+
+/* Contact — heading + stacked links that brighten on hover */
+.info-contact { margin-bottom: 1.6em; }
+.info-contact-heading { margin-bottom: 0.5em; }
+.info-contact a {
+  display: block;
+  text-decoration: none;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+  line-height: 1.6;
+}
+.info-contact a:hover { opacity: 1; }
+
+/* Copyright / privacy — fine print */
+.info-copyright {
+  font-size: calc(var(--fs-info) * 0.85);
+  opacity: 0.45;
+  line-height: 1.5;
+  margin-top: 0.4em;
+}
+.info-copyright a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
 /* ─── Mobile (portrait) button repositioning ────────────── */
 /* screenshot centre-left · archive top-right · hide centre-right · info bottom-right */
