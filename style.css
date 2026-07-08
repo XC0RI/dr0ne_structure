@@ -530,13 +530,16 @@ html, body {
 }
 
 /* ─── Upload image preview ───────────────────────────────── */
-#upload-preview-wrap {
+#upload-preview-wrap,
+#edit-preview-wrap {
   border: 1px solid rgba(255,255,255,0.15);
   margin-bottom: 20px;
   display: none;
 }
-#upload-preview-wrap.has-image { display: block; }
-#upload-preview {
+#upload-preview-wrap.has-image,
+#edit-preview-wrap.has-image { display: block; }
+#upload-preview,
+#edit-preview {
   width: 100%;
   max-height: 200px;
   object-fit: contain;
@@ -697,10 +700,11 @@ html, body {
 .info-credit { margin-bottom: 1.4em; }
 
 /* Contact — heading + stacked links that brighten on hover */
-.info-contact { margin-bottom: 1.6em; }
+.info-contact { margin-top: 0.4em; }
 .info-contact-heading { margin-bottom: 0.5em; }
 .info-contact a {
   display: block;
+  font-size: var(--fs-info);      /* same font + size as the rest of the site */
   text-decoration: none;
   opacity: 0.55;
   transition: opacity 0.15s;
@@ -708,9 +712,9 @@ html, body {
 }
 .info-contact a:hover { opacity: 1; }
 
-/* Copyright / privacy — fine print */
+/* Copyright / privacy — fine print (same size as the rest, just dimmed) */
 .info-copyright {
-  font-size: calc(var(--fs-info) * 0.85);
+  font-size: var(--fs-info);
   opacity: 0.45;
   line-height: 1.5;
   margin-top: 0.4em;
