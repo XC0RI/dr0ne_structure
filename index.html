@@ -10,6 +10,29 @@
 </head>
 <body>
 
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="drone-emboss" x="-45%" y="-45%" width="190%" height="190%" color-interpolation-filters="sRGB">
+      <!-- Glyphen-Silhouette, weichgezeichnet -->
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.6" result="blur"/>
+      <!-- dunkler Schatten, gerade nach unten -->
+      <feOffset in="blur" dx="0" dy="1.5" result="dOff"/>
+      <feFlood flood-color="#000000" flood-opacity="0.5" result="dF"/>
+      <feComposite in="dF" in2="dOff" operator="in" result="dS"/>
+      <feComposite in="dS" in2="SourceAlpha" operator="out" result="dk"/>
+      <!-- helles Highlight, gerade nach oben -->
+      <feOffset in="blur" dx="0" dy="-1.5" result="lOff"/>
+      <feFlood flood-color="#ffffff" flood-opacity="0.9" result="lF"/>
+      <feComposite in="lF" in2="lOff" operator="in" result="lS"/>
+      <feComposite in="lS" in2="SourceAlpha" operator="out" result="lt"/>
+      <feMerge>
+        <feMergeNode in="lt"/>
+        <feMergeNode in="dk"/>
+      </feMerge>
+    </filter>
+  </defs>
+</svg>
+
   <!-- ── Collage backdrop ─────────────────────────────────────────────── -->
   <div id="collage-stack"></div>
 
