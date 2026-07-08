@@ -699,25 +699,23 @@ html, body {
 /* Credits — label on its own line, name below as the (linked) second line */
 .info-credit { margin-bottom: 1.4em; }
 
-/* Contact — heading + stacked links that brighten on hover */
+/* Contact — heading + stacked links styled exactly like the other links
+   (white, underlined, dim on hover). No extra gap under the heading. */
 .info-contact { margin-top: 0.4em; }
-.info-contact-heading { margin-bottom: 0.5em; }
+.info-contact-heading { margin-bottom: 0; }
 .info-contact a {
   display: block;
   font-size: var(--fs-info);      /* same font + size as the rest of the site */
-  text-decoration: none;
-  opacity: 0.55;
-  transition: opacity 0.15s;
   line-height: 1.6;
 }
-.info-contact a:hover { opacity: 1; }
 
-/* Copyright / privacy — fine print (same size as the rest, just dimmed) */
+/* Copyright / privacy — fine print (same size as the rest, just dimmed).
+   The extra margin-top lifts the two credit blocks one line clear of it. */
 .info-copyright {
   font-size: var(--fs-info);
   opacity: 0.45;
   line-height: 1.5;
-  margin-top: 0.4em;
+  margin-top: 2.9em;
 }
 .info-copyright a {
   text-decoration: underline;
