@@ -142,8 +142,9 @@ html, body {
   transform: translate(-50%, -50%);
   z-index: 100;
   font-size: var(--fs);
-  color: var(--white);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.6), 0 2px 16px rgba(0,0,0,0.5);
+  color: #fff;                 /* opak — dient nur als Formquelle für den Filter, wird nie gemalt */
+  text-shadow: none;           /* alten Schatten entfernen */
+  filter: url(#drone-emboss);
   cursor: default;
   pointer-events: none;        /* ghost: floats above everything, never blocks clicks */
   user-select: none;
