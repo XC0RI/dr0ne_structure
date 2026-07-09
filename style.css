@@ -161,6 +161,13 @@ html, body {
   line-height: 1;
 }
 
+/* On PC (mouse devices) the centre logo is 30% larger. scale() enlarges the
+   whole rendered label — glyph *and* emboss relief — so the shading stays
+   proportional. Touch devices (incl. phones in landscape) keep the base size. */
+@media (hover: hover) and (pointer: fine) {
+  #drone-label { transform: translate(-50%, -50%) scale(1.3); }
+}
+
 /* ─── Archive Overlay ────────────────────────────────────── */
 #archive-overlay {
   position: fixed;
