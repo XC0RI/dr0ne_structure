@@ -39,6 +39,12 @@ html, body {
   font-weight: 500;
   color: var(--white);
   -webkit-font-smoothing: antialiased;
+  /* Keep our explicit font sizes; stop iOS from auto-inflating text in
+     landscape (a narrow, centred block like the info overlay otherwise gets
+     scaled up relative to the wide viewport, unlike the full-width archive). */
+  -webkit-text-size-adjust: 100%;
+     -moz-text-size-adjust: 100%;
+          text-size-adjust: 100%;
 }
 
 /* ─── Collage Container ──────────────────────────────────── */
@@ -669,6 +675,12 @@ html, body {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
+  /* When the text doesn't fit (short/landscape windows) allow scrolling instead
+     of clipping unreachably. On overflow, space-between packs to the top, so the
+     first line stays reachable and the rest scrolls into view. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 #info-overlay.open {
   opacity: 1;
