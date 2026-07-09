@@ -12,6 +12,8 @@
 :root {
   --fs:      clamp(24px, 6vw, 38px);
   --fs-info: calc(var(--fs) / 4);     /* smaller: /4 instead of /3 */
+  --fs-logo: clamp(33px, 7.5vw, 45px);  /* logo only — decoupled from --fs so
+                                           the archive/UI keep their sizes */
 
   --white:       #ffffff;
   --black:       #000000;
@@ -147,7 +149,7 @@ html, body {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 100;
-  font-size: var(--fs);
+  font-size: var(--fs-logo);
   color: #fff;                 /* opak — dient nur als Formquelle für den Filter, wird nie gemalt */
   text-shadow: none;           /* alten Schatten entfernen */
   filter: url(#drone-emboss);
