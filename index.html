@@ -336,14 +336,21 @@
         if (!fs) return false;
         const fontUrl = await getDroneFontDataUrl();
         if (!fontUrl) return false;               // fallback font would look wrong → flat draw
-        const dpr  = window.devicePixelRatio || 1;
-        const ls   = -0.01 * fs;                  // letter-spacing: -0.01em
-        const pad  = Math.ceil(fs);               // room for the blurred relief
-        const svgW = Math.ceil(dlR.width  + pad * 2);
-        const svgH = Math.ceil(dlR.height + pad * 2);
-        // width/height at dpr → crisp on hi-dpi; viewBox keeps filter units in CSS px
+        // The label may carry a CSS transform scale (desktop enlarges it via
+        // scale()). getBoundingClientRect() is post-transform, so render the
+        // emboss at its *base* size + base filter, then blit scaled by the same
+        // factor — glyph and relief scale together, matching what's on screen.
+        let scale = 1;
+        try { const mm = new DOMMatrixReadOnly(cs.transform); scale = Math.hypot(mm.a, mm.b) || 1; } catch (e) {}
+        const dpr   = window.devicePixelRatio || 1;
+        const ls    = -0.01 * fs;                 // letter-spacing: -0.01em
+        const pad   = Math.ceil(fs);              // room for the blurred relief
+        const svgW  = Math.ceil(dlR.width  / scale + pad * 2);   // undo transform for the box
+        const svgH  = Math.ceil(dlR.height / scale + pad * 2);
+        // raster at dpr*scale → crisp after the scaled blit; viewBox stays in base
+        // CSS px so the filter relief scales with the glyph
         const svg =
-`<svg xmlns="http://www.w3.org/2000/svg" width="${svgW * dpr}" height="${svgH * dpr}" viewBox="0 0 ${svgW} ${svgH}">
+`<svg xmlns="http://www.w3.org/2000/svg" width="${Math.ceil(svgW * dpr * scale)}" height="${Math.ceil(svgH * dpr * scale)}" viewBox="0 0 ${svgW} ${svgH}">
 <defs>
 <style>@font-face{font-family:'GeistDr0ne';src:url(${fontUrl}) format('woff2');font-weight:500;font-style:normal;}</style>
 <filter id="e" x="-45%" y="-45%" width="190%" height="190%" color-interpolation-filters="sRGB">
@@ -370,7 +377,8 @@
           await img.decode();
           const cx = dlR.left + dlR.width  / 2;
           const cy = dlR.top  + dlR.height / 2;
-          ctx.drawImage(img, cx - svgW / 2, cy - svgH / 2, svgW, svgH);
+          const dw = svgW * scale, dh = svgH * scale;
+          ctx.drawImage(img, cx - dw / 2, cy - dh / 2, dw, dh);
           return true;
         } finally {
           URL.revokeObjectURL(url);
