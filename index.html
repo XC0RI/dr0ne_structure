@@ -306,6 +306,80 @@
   </script>
 
   <script>
+    // ── Neumorphic DR0NE label for screenshots ─────────────────────────
+    // The live label is an embossed ghost (opaque text through the SVG
+    // #drone-emboss filter — only highlight + shadow are merged, never a solid
+    // fill). To reproduce it faithfully in the canvas we render the *same*
+    // filter via an inline SVG image, with the GeistDr0ne font embedded as a
+    // data-URI (page @font-face rules aren't visible to an <img>-rendered SVG,
+    // so the font must travel inside the SVG). Font is fetched once and cached.
+    let __droneFontDataUrl;
+    async function getDroneFontDataUrl() {
+      if (__droneFontDataUrl !== undefined) return __droneFontDataUrl;
+      try {
+        const res   = await fetch('/fonts/GeistDr0ne-Medium.woff2');
+        const bytes = new Uint8Array(await res.arrayBuffer());
+        let bin = '';
+        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+        __droneFontDataUrl = 'data:font/woff2;base64,' + btoa(bin);
+      } catch (e) {
+        __droneFontDataUrl = null;
+      }
+      return __droneFontDataUrl;
+    }
+
+    async function drawEmbossLabel(ctx, dl) {
+      try {
+        const dlR = dl.getBoundingClientRect();
+        const cs  = getComputedStyle(dl);
+        const fs  = parseFloat(cs.fontSize);
+        if (!fs) return false;
+        const fontUrl = await getDroneFontDataUrl();
+        if (!fontUrl) return false;               // fallback font would look wrong → flat draw
+        const dpr  = window.devicePixelRatio || 1;
+        const ls   = -0.01 * fs;                  // letter-spacing: -0.01em
+        const pad  = Math.ceil(fs);               // room for the blurred relief
+        const svgW = Math.ceil(dlR.width  + pad * 2);
+        const svgH = Math.ceil(dlR.height + pad * 2);
+        // width/height at dpr → crisp on hi-dpi; viewBox keeps filter units in CSS px
+        const svg =
+`<svg xmlns="http://www.w3.org/2000/svg" width="${svgW * dpr}" height="${svgH * dpr}" viewBox="0 0 ${svgW} ${svgH}">
+<defs>
+<style>@font-face{font-family:'GeistDr0ne';src:url(${fontUrl}) format('woff2');font-weight:500;font-style:normal;}</style>
+<filter id="e" x="-45%" y="-45%" width="190%" height="190%" color-interpolation-filters="sRGB">
+<feGaussianBlur in="SourceAlpha" stdDeviation="1.6" result="blur"/>
+<feOffset in="blur" dx="0" dy="1.5" result="dOff"/>
+<feFlood flood-color="#000000" flood-opacity="0.5" result="dF"/>
+<feComposite in="dF" in2="dOff" operator="in" result="dS"/>
+<feComposite in="dS" in2="SourceAlpha" operator="out" result="dk"/>
+<feOffset in="blur" dx="0" dy="-1.5" result="lOff"/>
+<feFlood flood-color="#ffffff" flood-opacity="0.9" result="lF"/>
+<feComposite in="lF" in2="lOff" operator="in" result="lS"/>
+<feComposite in="lS" in2="SourceAlpha" operator="out" result="lt"/>
+<feMerge><feMergeNode in="lt"/><feMergeNode in="dk"/></feMerge>
+</filter>
+</defs>
+<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" fill="#ffffff"
+ font-family="GeistDr0ne, sans-serif" font-weight="500" font-size="${fs}" letter-spacing="${ls.toFixed(3)}"
+ filter="url(#e)">DR0NE</text>
+</svg>`;
+        const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
+        try {
+          const img = new Image();
+          img.src = url;
+          await img.decode();
+          const cx = dlR.left + dlR.width  / 2;
+          const cy = dlR.top  + dlR.height / 2;
+          ctx.drawImage(img, cx - svgW / 2, cy - svgH / 2, svgW, svgH);
+          return true;
+        } finally {
+          URL.revokeObjectURL(url);
+        }
+      } catch (e) {
+        return false;
+      }
+    }
+
     document.getElementById('screenshot-btn').addEventListener('click', async () => {
       const btn   = document.getElementById('screenshot-btn');
       const flash = document.getElementById('screenshot-flash');
@@ -367,9 +441,12 @@
               const ps = Array.from(info.querySelectorAll('p'));
               if (ps.length > 0) {
                 const fsinfo = Math.min(Math.max(vw * 0.06, 24), 38) / 4;
-                // Determine alignment from wrap position
-                const wrapRect     = infoWrap.getBoundingClientRect();
-                const isRightSide  = wrapRect.left + wrapRect.width / 2 > vw / 2;
+                // Mirror the CSS alignment: the right frame is right-aligned,
+                // everything else left-aligned. Draw each line to the same edge
+                // the DOM uses (pr.right vs pr.left) so short lines hug the
+                // correct side instead of collapsing to the box's left edge.
+                const align   = getComputedStyle(info).textAlign;
+                const isRight = (align === 'right' || align === 'end');
 
                 ctx.save();
                 ctx.beginPath();
@@ -382,11 +459,11 @@
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 1;
                 ctx.textBaseline  = 'hanging';
-                ctx.textAlign     = 'left';
+                ctx.textAlign     = isRight ? 'right' : 'left';
 
                 for (const p of ps) {
                   const pr = p.getBoundingClientRect();
-                  ctx.fillText(p.textContent.trim(), pr.left, pr.top);
+                  ctx.fillText(p.textContent.trim(), isRight ? pr.right : pr.left, pr.top);
                 }
                 ctx.restore();
               }
@@ -394,25 +471,26 @@
           }
         }
 
-        // Draw DR0NE label
-        const dl  = document.getElementById('drone-label');
-        const dlR = dl.getBoundingClientRect();
-        const fs  = Math.min(Math.max(vw * 0.06, 24), 38);
-        ctx.save();
-        ctx.font          = `normal ${fs}px GeistDr0ne, sans-serif`;
-        ctx.fillStyle     = '#ffffff';
-        ctx.textAlign     = 'left';
-        ctx.textBaseline  = 'hanging';
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 1;
-        ctx.shadowColor   = 'rgba(0,0,0,0.6)';
-        ctx.shadowBlur    = 4;
-        ctx.fillText('DR0NE', dlR.left, dlR.top);
-        ctx.shadowOffsetY = 2;
-        ctx.shadowColor   = 'rgba(0,0,0,0.5)';
-        ctx.shadowBlur    = 16;
-        ctx.fillText('DR0NE', dlR.left, dlR.top);
-        ctx.restore();
+        // Draw DR0NE label — reproduce the neumorphic emboss (same SVG filter
+        // as the live #drone-label). Falls back to a flat draw if the SVG /
+        // font route is unavailable, so a screenshot is always produced.
+        const dl = document.getElementById('drone-label');
+        const embossed = await drawEmbossLabel(ctx, dl);
+        if (!embossed) {
+          const dlR = dl.getBoundingClientRect();
+          const fs  = parseFloat(getComputedStyle(dl).fontSize) || Math.min(Math.max(vw * 0.06, 24), 38);
+          ctx.save();
+          ctx.font          = `normal ${fs}px GeistDr0ne, sans-serif`;
+          ctx.fillStyle     = '#ffffff';
+          ctx.textAlign     = 'left';
+          ctx.textBaseline  = 'hanging';
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 1;
+          ctx.shadowColor   = 'rgba(0,0,0,0.6)';
+          ctx.shadowBlur    = 4;
+          ctx.fillText('DR0NE', dlR.left, dlR.top);
+          ctx.restore();
+        }
 
         // Watermark — sparse diagonal pattern, widely spaced
         ctx.save();
